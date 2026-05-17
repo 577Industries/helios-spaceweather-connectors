@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from .adapters.base import BaseAdapter
 from .adapters.donki import DonkiAdapter
+from .adapters.dscovr import DscovrAdapter
 from .cache import CacheKey, FileCache, default_cache_root
 from .http import DEFAULT_USER_AGENT, make_client
 from .ratelimit import RateLimitConfig, RateLimiter
@@ -39,6 +40,7 @@ __all__ = [
     "BaseAdapter",
     "CacheKey",
     "DonkiAdapter",
+    "DscovrAdapter",
     "FileCache",
     "NormalizedRecord",
     "ProvenanceRecord",

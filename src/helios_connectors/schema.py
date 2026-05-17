@@ -56,6 +56,8 @@ class SourceID(StrEnum):
     GOES_XRAY = "goes_xray"
     GOES_PROTON = "goes_proton"
     DSCOVR = "dscovr"
+    DSCOVR_MAG = "dscovr_mag"
+    DSCOVR_PLASMA = "dscovr_plasma"
 
 
 @dataclass(frozen=True, slots=True)

@@ -66,3 +66,7 @@ results/local/
 *.pth
 *.h5
 *.safetensors
+
+# PySPEDAS local download cache (NCEI archive mirrors)
+dscovr_data/
+pyspedas_data/
