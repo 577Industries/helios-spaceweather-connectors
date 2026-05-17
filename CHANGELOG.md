@@ -23,6 +23,21 @@ All notable changes to this project are documented here, following [Keep a Chang
   Critical Gannon-storm assertion: `fetch_tec_at_point(lat=40, lon=-83)`
   across 2024-05-10 yields peak TEC > 30 TECU around 20 UTC, consistent
   with the published Gannon-storm Midwest enhancement of >50 TECU.
+- `SepScoreboardsAdapter` — CCMC's three SEP Scoreboards (A onset probability,
+  B peak flux, C event time profiles) consumed as consensus aggregates. BUILD
+  strategy (no Python client existed). HESPERIA REleASE explicitly excluded
+  from request paths per the proposal's licensing constraint: triple-layered
+  guard (registry exclusion + per-request path token check + construction-time
+  spec validation) with a regression test that sweeps every URL the adapter
+  would issue and asserts none contains `release` or `hesperia`.
+- Recorded fixtures covering the September 2017 storm event (proposal Table 3-1
+  training event) for downstream kill-gate eval, plus 2024-05 (Gannon-week)
+  recent fixtures across UMASEP, SEPSTER, and a documentation-shape sample
+  with all-three-board projections populated.
+- 50 unit tests on `SepScoreboardsAdapter`, 90% line+branch coverage. Walks
+  Apache mod_autoindex listings on the ISWA data tree (the actual
+  machine-accessible mirror; the interactive `sep.ccmc.gsfc.nasa.gov` web apps
+  are SPAs not suitable for adapter use). Default 3 RPS rate limit.
 - `GoesAdapter` — GOES X-ray flux and integral proton flux. WRAP strategy with
   PySPEDAS for historical NCEI archive and NOAA SWPC near-real-time JSON for
   the last ~30 days. Intentional overlap with `SwpcAdapter` for proton flux;

@@ -13,6 +13,7 @@ from .cddis_gim import CddisGimAdapter
 from .donki import DonkiAdapter
 from .dscovr import DscovrAdapter
 from .goes import GoesAdapter
+from .sep_scoreboards import SepScoreboardsAdapter
 from .swpc import SwpcAdapter
 
 __all__ = [
@@ -21,5 +22,6 @@ __all__ = [
     "DonkiAdapter",
     "DscovrAdapter",
     "GoesAdapter",
+    "SepScoreboardsAdapter",
     "SwpcAdapter",
 ]

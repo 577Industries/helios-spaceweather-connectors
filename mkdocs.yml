@@ -98,3 +98,4 @@ nav:
   - Adapters:
       - DONKI: adapters/donki.md
       - CDDIS GIM: adapters/cddis.md
+      - SEP Scoreboards: adapters/sep_scoreboards.md
