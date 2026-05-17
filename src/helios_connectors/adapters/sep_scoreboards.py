@@ -165,52 +165,114 @@ class ScoreboardModelSpec:
         parts = (self.name, *self.variants)
         return "/".join(parts)
 
+    def listing_path(self, energy: str, year: int, month: str) -> str:
+        """Build the Apache-index URL for a (model, energy, year, month).
+
+        Empty-string ``energy`` (used by models whose year directories sit
+        directly under the variants chain — e.g. SEPSTER, MagPy, SAWS_ASPECS
+        per the v0.2.1 ISWA probe) is omitted so the URL stays well-formed.
+        """
+        if energy:
+            return f"{ISWA_SCOREBOARD_PREFIX}/{self.base_path()}/{energy}/{year}/{month}/"
+        return f"{ISWA_SCOREBOARD_PREFIX}/{self.base_path()}/{year}/{month}/"
+
 
 # Default registry of contributing models. Discovered live from the ISWA
-# data tree (2026-05). Deliberately excludes RELEASE and all REleASE-
-# variant directories per the licensing constraint described in the
-# module docstring.
+# data tree. Deliberately excludes RELEASE and all REleASE-variant
+# directories per the licensing constraint described in the module
+# docstring.
+#
+# v0.2.1 (Sprint C-Training-v2): expanded after exhaustive ISWA probe
+# documented in
+# ``helios-program/results/2026-05-17-iswa-coverage-matrix.md``. The
+# probe established ISWA's earliest deposits are calendar 2017 for
+# UMASEP v2_0, SEPSTER (Parker + WSA-ENLIL), SAWS_ASPECS Nowcasts/Profile,
+# NCAR_MLSO_KCOR, and mag4_2019; later for everything else. The previous
+# registry's variant chains for SAWS_ASPECS / SPRINTS-SEP / iPATH did
+# not reach year-level directories (zero JSONs returned). The v0.2.1
+# expansion replaces those bad chains with the actual ISWA layout. SEPMOD
+# is dropped from the default registry — the directory was not visible
+# in the exhaustive probe (likely retired upstream); callers can still
+# inject it via the ``models=`` constructor kwarg if needed.
+#
+# Energy levels covered by UMASEP. Other models encode energy in the
+# JSON ``energy_channel.units`` field rather than a directory level, so
+# the registry uses empty-string energies (see
+# :meth:`ScoreboardModelSpec.listing_path`).
+_UMASEP_ENERGIES: tuple[str, ...] = ("10MeV", "30MeV", "50MeV", "100MeV", "500MeV")
+
 SCOREBOARD_MODELS: tuple[ScoreboardModelSpec, ...] = (
+    # UMASEP — multiple versions covering different year ranges. v2_0
+    # covers the Table 3-1 Sept 2017 training event; v3_X covers
+    # 2022-present (kill-gate hold-out events 2022/2023/2024).
+    ScoreboardModelSpec(name="UMASEP", variants=("v3_X",), energies=_UMASEP_ENERGIES),
+    ScoreboardModelSpec(name="UMASEP", variants=("v2_1",), energies=_UMASEP_ENERGIES),
+    ScoreboardModelSpec(name="UMASEP", variants=("v2_0",), energies=_UMASEP_ENERGIES),
     ScoreboardModelSpec(
         name="UMASEP",
-        variants=("v3_X",),
-        energies=("10MeV", "30MeV", "50MeV", "100MeV", "500MeV"),
+        variants=("v20190101",),
+        energies=("10MeV", "100MeV", "500MeV"),
     ),
+    # SEPSTER — two independent solar-wind backgrounds. Parker spiral +
+    # WSA-ENLIL each have 2017 coverage. Energy is implicit in the
+    # JSON envelope.
+    ScoreboardModelSpec(name="SEPSTER", variants=("Parker",), energies=("",)),
+    ScoreboardModelSpec(name="SEPSTER", variants=("WSA-ENLIL",), energies=("",)),
+    # SEPSTER2D — 2D solar-wind model; covers 2020-present.
+    ScoreboardModelSpec(name="SEPSTER2D", variants=("1.X",), energies=("",)),
+    # SAWS_ASPECS — corrected variant chains. The actual layout has
+    # {Forecasts,Nowcasts} x {Intensity,Probability,Profile} between
+    # the 1.X version dir and the year. Nowcasts/Profile has 2017+
+    # coverage; the rest start 2022+.
     ScoreboardModelSpec(
-        name="SEPSTER",
-        variants=("Parker",),
-        energies=("10MeV",),
-    ),
-    ScoreboardModelSpec(
-        name="SEPSTER2D",
-        variants=("1.X",),
-        energies=("10MeV",),
+        name="SAWS_ASPECS",
+        variants=("1.X", "Forecasts", "Probability"),
+        energies=("",),
     ),
     ScoreboardModelSpec(
         name="SAWS_ASPECS",
-        variants=("1.X",),
-        energies=("10MeV",),
+        variants=("1.X", "Nowcasts", "Probability"),
+        energies=("",),
     ),
     ScoreboardModelSpec(
-        name="SEPMOD",
-        variants=(),
-        energies=("10MeV",),
+        name="SAWS_ASPECS",
+        variants=("1.X", "Forecasts", "Intensity"),
+        energies=("",),
     ),
     ScoreboardModelSpec(
-        name="MagPy",
-        variants=("3.X", "VEC"),
-        energies=("10MeV",),
+        name="SAWS_ASPECS",
+        variants=("1.X", "Nowcasts", "Profile"),
+        energies=("",),
     ),
+    # MagPy — magnetic-particle ML model. 2.X covers 2023-2025;
+    # 3.X/VEC + 3.X/LOS cover 2025-present.
+    ScoreboardModelSpec(name="MagPy", variants=("3.X", "VEC"), energies=("",)),
+    ScoreboardModelSpec(name="MagPy", variants=("3.X", "LOS"), energies=("",)),
+    ScoreboardModelSpec(name="MagPy", variants=("2.X",), energies=("",)),
+    # SPRINTS-SEP — corrected variants chain. Year dirs live under
+    # 1.X/Post_Eruptive (2022-present coverage).
     ScoreboardModelSpec(
         name="SPRINTS-SEP",
-        variants=(),
-        energies=("10MeV",),
+        variants=("1.X", "Post_Eruptive"),
+        energies=("",),
     ),
-    ScoreboardModelSpec(
-        name="iPATH",
-        variants=(),
-        energies=("10MeV",),
-    ),
+    # iPATH — model directory exists on the ISWA tree but the exhaustive
+    # probe found no year subdirectories at all (no deposited data yet).
+    # Registry entry retained with the conventional 2.X variant; the
+    # listing walk will silently 404 until iPATH starts depositing data.
+    ScoreboardModelSpec(name="iPATH", variants=("2.X",), energies=("",)),
+    # GSU_All_Clear — newly discovered. v0_1 covers 2023-present.
+    ScoreboardModelSpec(name="GSU_All_Clear", variants=("v0_1",), energies=("",)),
+    # SEPForecast — newly discovered. 2X covers 2025-present.
+    ScoreboardModelSpec(name="SEPForecast", variants=("2X",), energies=("",)),
+    # mag4_2019 — magnetogram-derived multi-channel SEP probability
+    # model newly discovered. Five NRT-variant streams; all five have
+    # 2017+ coverage (broadest pre-2018 history of any model).
+    ScoreboardModelSpec(name="mag4_2019", variants=("HMI-NRT-JSON",), energies=("",)),
+    ScoreboardModelSpec(name="mag4_2019", variants=("V-HMI-NRT-JSON",), energies=("",)),
+    ScoreboardModelSpec(name="mag4_2019", variants=("VPLUS-HMI-NRT-JSON",), energies=("",)),
+    ScoreboardModelSpec(name="mag4_2019", variants=("VWF-HMI-NRT-JSON",), energies=("",)),
+    ScoreboardModelSpec(name="mag4_2019", variants=("WF-HMI-NRT-JSON",), energies=("",)),
 )
 
 
@@ -499,7 +561,7 @@ class SepScoreboardsAdapter(BaseAdapter):
         for spec in self._models:
             for energy in spec.energies:
                 for year, month in months:
-                    path = f"{ISWA_SCOREBOARD_PREFIX}/{spec.base_path()}/{energy}/{year}/{month}/"
+                    path = spec.listing_path(energy, year, month)
                     listing_paths.append((spec, energy, path))
 
         # Fetch all listings concurrently; tolerate 404s for model/energy/month
@@ -641,7 +703,7 @@ class SepScoreboardsAdapter(BaseAdapter):
             id="helios-spaceweather-connectors/SepScoreboardsAdapter",
             name="SepScoreboardsAdapter",
             type="software",
-            version="0.2.0",
+            version="0.2.1",
         )
         dataset_refs = list(record.provenance.dataset_refs) or [
             f"{ISWA_BASE_URL}{ISWA_SCOREBOARD_PREFIX}/"
@@ -651,7 +713,7 @@ class SepScoreboardsAdapter(BaseAdapter):
             created_at=record.provenance.ingestion_timestamp,
             agent=agent,
             model_id=record.provenance.model_id,
-            model_version="0.2.0",
+            model_version="0.2.1",
             dataset_refs=dataset_refs,
             timestamp=record.provenance.timestamp,
             value=value,

@@ -36,7 +36,7 @@ from .http import DEFAULT_USER_AGENT, make_client
 from .ratelimit import RateLimitConfig, RateLimiter
 from .schema import HeliosModelOutputRecord, NormalizedRecord, SourceID
 
-__version__ = "0.2.0"
+__version__ = "0.2.1"
 
 __all__ = [
     "DEFAULT_USER_AGENT",
