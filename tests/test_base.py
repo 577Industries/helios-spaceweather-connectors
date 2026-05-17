@@ -40,9 +40,9 @@ class _StubAdapter(BaseAdapter):
             model_id="stub/probe",
             dataset_refs=("stub-1",),
             timestamp=start,
-            value={"hello": "world"},
+            value="hello-world",
             value_units="none",
-            lineage=("upstream-1",),
+            extra={"lineage": ["upstream-1"]},
             record_id="stub-1",
         )
         yield NormalizedRecord(
@@ -85,7 +85,8 @@ async def test_fetch_streams_records() -> None:
     assert recs[0].source == SourceID.DONKI
     assert recs[0].record_type == "stub"
     assert recs[0].provenance.id == "stub-1"
-    assert recs[0].provenance.lineage == ("upstream-1",)
+    assert recs[0].provenance.extra is not None
+    assert recs[0].provenance.extra["lineage"] == ["upstream-1"]
     # Provenance UTC normalization
     assert recs[0].provenance.timestamp.tzinfo is not None
     assert recs[0].provenance.ingestion_timestamp.tzinfo is not None
@@ -134,8 +135,9 @@ async def test_provenance_helper_normalizes_timestamps() -> None:
             value_units="none",
         )
     assert prov.timestamp.tzinfo is not None
-    assert prov.timestamp.utcoffset() is not None
-    assert prov.timestamp.utcoffset().total_seconds() == 0  # UTC
+    offset = prov.timestamp.utcoffset()
+    assert offset is not None
+    assert offset.total_seconds() == 0  # UTC
 
 
 @pytest.mark.asyncio

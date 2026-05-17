@@ -291,7 +291,7 @@ async def test_swpc_path_explicit_backend(
             )
         ]
     assert len(records) == 10
-    assert all(r.source == SourceID.DSCOVR_MAG for r in records)
+    assert all(r.source == SourceID.DSCOVR for r in records)
     assert all(r.record_type == "mag" for r in records)
     # SWPC mag is published in GSM
     assert all(r.value["frame"] == "GSM" for r in records)
@@ -314,7 +314,7 @@ async def test_swpc_plasma_fetch_normalizes(
             )
         ]
     assert len(records) == 10
-    assert all(r.source == SourceID.DSCOVR_PLASMA for r in records)
+    assert all(r.source == SourceID.DSCOVR for r in records)
     assert records[0].value["density"] == pytest.approx(12.45)
     assert records[0].value["speed"] == pytest.approx(615.3)
     assert records[0].value["temperature"] == pytest.approx(342156.0)
@@ -379,7 +379,7 @@ async def test_pyspedas_path_routes_for_historical_window(
             ]
 
     assert len(records) == 10
-    assert all(r.source == SourceID.DSCOVR_MAG for r in records)
+    assert all(r.source == SourceID.DSCOVR for r in records)
     # PySPEDAS path emits GSE-frame samples
     assert all(r.value["frame"] == "GSE" for r in records)
     # Lineage cites the NCEI archive
@@ -438,7 +438,7 @@ async def test_pyspedas_plasma_path(
                 )
             ]
     assert len(records) == 8
-    assert all(r.source == SourceID.DSCOVR_PLASMA for r in records)
+    assert all(r.source == SourceID.DSCOVR for r in records)
     # Speed should exceed 600 km/s — the G5 hallmark
     speeds = [r.value["speed"] for r in records if r.value.get("speed") is not None]
     assert max(speeds) > 700
@@ -514,8 +514,10 @@ async def test_unified_fetch_dispatches_both_products(
             )
         ]
     sources = {r.source for r in records}
-    assert SourceID.DSCOVR_MAG in sources
-    assert SourceID.DSCOVR_PLASMA in sources
+    record_types = {r.record_type for r in records}
+    assert sources == {SourceID.DSCOVR}
+    assert "mag" in record_types
+    assert "plasma" in record_types
 
 
 @pytest.mark.asyncio
@@ -554,13 +556,12 @@ def test_dscovr_products_constant() -> None:
 
 
 def test_intentional_overlap_with_swpc_documented() -> None:
-    """Coordination invariant: DscovrAdapter records use DSCOVR_* SourceIDs,
-    NEVER SWPC_* ones, even when the data physically came from SWPC. This
-    keeps the instrument-tagged vs operator-tagged stream split downstream."""
+    """Coordination invariant: DscovrAdapter records use SourceID.DSCOVR,
+    never SourceID.SWPC, even when the data physically came from SWPC.
+    This keeps the instrument-tagged vs operator-tagged stream split
+    downstream — per-product detail lives on ``record_type``."""
     assert DscovrAdapter.source_id == SourceID.DSCOVR
-    # Sanity: the SWPC source IDs are siblings, not what we emit
-    assert SourceID.DSCOVR_MAG != SourceID.SWPC_MAG
-    assert SourceID.DSCOVR_PLASMA != SourceID.SWPC_PLASMA
+    assert SourceID.DSCOVR != SourceID.SWPC
 
 
 # ---------------------------------------------------------------------------- #
@@ -583,6 +584,6 @@ async def test_live_swpc_last_six_hours() -> None:
     assert len(plasma_records) > 0, "expected some plasma samples in the last 6 h"
     # Every record is DSCOVR-tagged, never SWPC-tagged
     for rec in mag_records:
-        assert rec.source == SourceID.DSCOVR_MAG
+        assert rec.source == SourceID.DSCOVR
     for rec in plasma_records:
-        assert rec.source == SourceID.DSCOVR_PLASMA
+        assert rec.source == SourceID.DSCOVR

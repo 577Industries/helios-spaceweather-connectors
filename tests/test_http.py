@@ -114,6 +114,11 @@ async def test_safe_log_params_filters(caplog: pytest.LogCaptureFixture) -> None
         params={"startDate": "2024-05-10", "api_key": "SECRET"},
         safe_log_params=("startDate",),
     )
-    for record in caplog.records:
+    # Tighten the assertion to the http module's own log records: caplog
+    # captures globally and earlier tests in the suite may leave records
+    # from other adapters in the buffer. The contract being tested is
+    # narrowly that ``request_with_retry`` itself never emits an api_key.
+    http_records = [rec for rec in caplog.records if rec.name == "helios_connectors.http"]
+    for record in http_records:
         assert "SECRET" not in record.getMessage()
     await client.aclose()

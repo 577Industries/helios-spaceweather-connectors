@@ -487,7 +487,8 @@ async def test_fetch_tec_maps_yields_per_2h_records(
         assert len(first_grid) == 71
         assert len(first_grid[0]) == 73
         # Lineage cites the analysis-center name
-        assert "IGS combined" in records[0].provenance.lineage
+        assert records[0].provenance.extra is not None
+        assert "IGS combined" in records[0].provenance.extra["lineage"]
     finally:
         await adapter.aclose()
 
@@ -738,13 +739,14 @@ async def test_cache_round_trip(_stub_earthdata_env: None, tmp_path: Path) -> No
 
 
 # ---------------------------------------------------------------------------- #
-# Provenance-spec bridge
+# Provenance-spec compliance — adapter records ARE HeliosModelOutputRecord
 # ---------------------------------------------------------------------------- #
 
 
 @pytest.mark.asyncio
-async def test_to_helios_model_output_point(_stub_earthdata_env: None, tmp_path: Path) -> None:
-    pytest.importorskip("helios_provenance")
+async def test_point_record_is_spec_compliant(_stub_earthdata_env: None, tmp_path: Path) -> None:
+    """tec_point records carry a scalar TEC value on the provenance record."""
+
     _seed_cache(tmp_path, 2024, 131, "igsg")
     adapter = CddisGimAdapter(cache=False, cache_root=tmp_path, use_earthaccess=False)
     try:
@@ -755,17 +757,18 @@ async def test_to_helios_model_output_point(_stub_earthdata_env: None, tmp_path:
             rec = r
             break
         assert rec is not None
-        payload = CddisGimAdapter.to_helios_model_output(rec)
-        assert isinstance(payload, dict)
-        assert payload["value_units"] == "TECU"
-        assert isinstance(payload["value"], (int, float))
+        prov = rec.provenance
+        assert prov.value_units == "TECU"
+        assert isinstance(prov.value, (int, float))
     finally:
         await adapter.aclose()
 
 
 @pytest.mark.asyncio
-async def test_to_helios_model_output_map(_stub_earthdata_env: None, tmp_path: Path) -> None:
-    pytest.importorskip("helios_provenance")
+async def test_map_record_carries_grid_in_extra(_stub_earthdata_env: None, tmp_path: Path) -> None:
+    """tec_map records put the full grid in extra and use the spatial-mean
+    TEC as the scalar value on the provenance record."""
+
     _seed_cache(tmp_path, 2024, 131, "igsg")
     adapter = CddisGimAdapter(cache=False, cache_root=tmp_path, use_earthaccess=False)
     try:
@@ -774,10 +777,10 @@ async def test_to_helios_model_output_map(_stub_earthdata_env: None, tmp_path: P
             rec = r
             break
         assert rec is not None
-        payload = CddisGimAdapter.to_helios_model_output(rec)
-        # The grid is moved to extra; value is the spatial mean.
-        assert "tec_grid_shape" in payload["extra"]
-        assert payload["extra"]["tec_grid_shape"] == [71, 73]
+        prov = rec.provenance
+        assert prov.extra is not None
+        assert prov.extra["tec_grid_shape"] == [71, 73]
+        assert isinstance(prov.value, (int, float))
     finally:
         await adapter.aclose()
 

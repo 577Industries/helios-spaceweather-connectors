@@ -45,7 +45,7 @@ def test_distinct_sources_distinct_keys() -> None:
     """Same params under different sources must not collide."""
     p = {"start": "2024-05-10"}
     k1 = CacheKey(SourceID.DONKI, p)
-    k2 = CacheKey(SourceID.GOES_XRAY, p)
+    k2 = CacheKey(SourceID.GOES, p)
     assert k1.fingerprint() != k2.fingerprint()
 
 
@@ -69,7 +69,7 @@ def test_invalidate_and_clear(cache: FileCache) -> None:
     df = pd.DataFrame({"a": [1]})
     k1 = CacheKey(SourceID.DONKI, {"x": 1})
     k2 = CacheKey(SourceID.DONKI, {"x": 2})
-    k3 = CacheKey(SourceID.GOES_XRAY, {"x": 1})
+    k3 = CacheKey(SourceID.GOES, {"x": 1})
     cache.write(k1, df)
     cache.write(k2, df)
     cache.write(k3, df)

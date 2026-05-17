@@ -570,9 +570,9 @@ async def test_fetch_scoreboard_a_end_to_end(
     assert all(r.record_type == "onset_probability" for r in records)
     # Every record's lineage should reference the file URL we mocked
     for rec in records:
-        assert any("UMASEP10_prediction" in step for step in rec.provenance.lineage), (
-            rec.provenance.lineage
-        )
+        assert rec.provenance.extra is not None
+        lineage = rec.provenance.extra["lineage"]
+        assert any("UMASEP10_prediction" in step for step in lineage), lineage
 
 
 @pytest.mark.asyncio
@@ -870,7 +870,8 @@ async def test_live_iswa_recent() -> None:
     # include the iswa URL.
     for rec in records:
         assert rec.source is SourceID.SEP_SCOREBOARD_A
-        assert any(ISWA_BASE_URL.split("//", 1)[1] in s for s in rec.provenance.lineage)
+        assert rec.provenance.extra is not None
+        assert any(ISWA_BASE_URL.split("//", 1)[1] in s for s in rec.provenance.extra["lineage"])
 
 
 # ---------------------------------------------------------------------------- #
