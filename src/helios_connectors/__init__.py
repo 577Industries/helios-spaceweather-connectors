@@ -27,6 +27,7 @@ from __future__ import annotations
 
 from .adapters.base import BaseAdapter
 from .adapters.donki import DonkiAdapter
+from .adapters.swpc import SwpcAdapter
 from .cache import CacheKey, FileCache, default_cache_root
 from .http import DEFAULT_USER_AGENT, make_client
 from .ratelimit import RateLimitConfig, RateLimiter
@@ -45,6 +46,7 @@ __all__ = [
     "RateLimitConfig",
     "RateLimiter",
     "SourceID",
+    "SwpcAdapter",
     "__version__",
     "default_cache_root",
     "make_client",
