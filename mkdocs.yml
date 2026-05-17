@@ -1,44 +1,96 @@
 site_name: helios-spaceweather-connectors
-site_description: "Production-grade Python adapters for six space-weather data sources (NASA DONKI, CCMC SEP Scoreboards A/B/C, NOAA SWPC, NASA CDDIS GIMs, GOES, DSCOVR), normalized to a common feature schema with feature-level provenance per helios-provenance-spec."
-site_url: "https://577industries.github.io/helios-spaceweather-connectors/"
-repo_url: "https://github.com/577Industries/helios-spaceweather-connectors"
+site_description: Production-grade Python adapters for space-weather data sources with feature-level provenance — 577 Industries NASA SBIR Phase I (subtopic SPWX.1.S26A)
+site_url: https://577industries.github.io/helios-spaceweather-connectors/
+site_author: 577 Industries Inc.
+repo_url: https://github.com/577Industries/helios-spaceweather-connectors
 repo_name: 577Industries/helios-spaceweather-connectors
-copyright: "Copyright 2026 577 Industries Inc."
+edit_uri: edit/main/
+copyright: >-
+  Copyright &copy; 2026 577 Industries Inc. — Apache 2.0 license. NASA SBIR Phase I work; no NASA endorsement implied.
+  See <a href="https://577industries.github.io/helios-program/">helios-program</a> for the master plan and proposal companion.
 
 theme:
   name: material
+  logo: assets/logo.svg
+  favicon: assets/favicon.svg
   features:
     - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
-    - toc.integrate
+    - navigation.indexes
+    - navigation.top
+    - navigation.footer
+    - toc.follow
     - search.suggest
+    - search.highlight
     - content.code.copy
+    - content.code.annotate
+    - content.action.edit
   palette:
-    - scheme: default
-      primary: deep purple
-      accent: amber
-    - scheme: slate
-      primary: deep purple
-      accent: amber
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: blue
+      accent: teal
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: teal
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+  font:
+    text: Inter
+    code: JetBrains Mono
 
 plugins:
   - search
-  - mkdocstrings:
-      handlers:
-        python:
-          options:
-            docstring_style: google
-            show_source: true
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: iso_date
+      fallback_to_build_date: true
+  - glightbox
 
 markdown_extensions:
   - admonition
-  - pymdownx.details
-  - pymdownx.highlight
-  - pymdownx.superfences
-  - pymdownx.tabbed
+  - attr_list
+  - footnotes
+  - md_in_html
   - tables
   - toc:
       permalink: true
+      toc_depth: 3
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/577Industries/helios-spaceweather-connectors
+      name: helios-spaceweather-connectors on GitHub
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/577-industries/
+      name: 577 Industries on LinkedIn
+  generator: false
+
+extra_css:
+  - stylesheets/extra.css
 
 nav:
   - Home: index.md

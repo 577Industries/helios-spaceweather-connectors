@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="HELIOS logo">
+  <title>HELIOS — sun + ionosphere</title>
+  <!-- Sun body -->
+  <circle cx="32" cy="30" r="11" fill="#1976d2"/>
+  <!-- Sun rays (8 directions) -->
+  <g stroke="#1976d2" stroke-width="2.6" stroke-linecap="round">
+    <line x1="32" y1="6"    x2="32" y2="13"/>
+    <line x1="32" y1="47"   x2="32" y2="54"/>
+    <line x1="6"  y1="30"   x2="13" y2="30"/>
+    <line x1="51" y1="30"   x2="58" y2="30"/>
+    <line x1="14" y1="12"   x2="18" y2="16"/>
+    <line x1="46" y1="44"   x2="50" y2="48"/>
+    <line x1="50" y1="12"   x2="46" y2="16"/>
+    <line x1="14" y1="48"   x2="18" y2="44"/>
+  </g>
+  <!-- Horizon / ionosphere -->
+  <line x1="2" y1="50" x2="62" y2="50" stroke="#009688" stroke-width="2.4" stroke-linecap="round"/>
+  <!-- Subtle ionospheric ripple (one small undulation, signals "disturbance") -->
+  <path d="M 2 50 Q 16 47, 30 50 T 62 50" fill="none" stroke="#009688" stroke-width="1.2" stroke-linecap="round" opacity="0.55"/>
+</svg>

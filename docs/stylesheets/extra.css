@@ -1,0 +1,31 @@
+/* HELIOS artifact docs — typography + dark-mode polish.
+   Visual identity matches helios-program (the program landing site) but
+   without the custom hero/cards (artifact docs are reference material). */
+
+[data-md-color-scheme="slate"] .md-typeset code {
+  background: rgba(255,255,255,0.06);
+}
+
+.md-typeset h1 {
+  letter-spacing: -0.02em;
+  font-weight: 700;
+}
+
+.md-typeset table:not([class]) {
+  font-size: 0.9rem;
+}
+
+.md-typeset .admonition, .md-typeset details {
+  border-radius: 0.35rem;
+}
+
+/* Subtle "part of the HELIOS program" footer link */
+.md-footer-meta::after {
+  content: "Part of the HELIOS program — see helios-program for the master plan and proposal companion.";
+  display: block;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  opacity: 0.7;
+  text-align: center;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
