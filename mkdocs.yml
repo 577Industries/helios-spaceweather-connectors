@@ -97,3 +97,4 @@ nav:
   - Adapter pattern: design.md
   - Adapters:
       - DONKI: adapters/donki.md
+      - CDDIS GIM: adapters/cddis.md

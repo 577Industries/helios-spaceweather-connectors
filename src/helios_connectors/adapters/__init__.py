@@ -9,9 +9,17 @@ implement the source-specific ``fetch_*`` methods.
 from __future__ import annotations
 
 from .base import BaseAdapter
+from .cddis_gim import CddisGimAdapter
 from .donki import DonkiAdapter
 from .dscovr import DscovrAdapter
 from .goes import GoesAdapter
 from .swpc import SwpcAdapter
 
-__all__ = ["BaseAdapter", "DonkiAdapter", "DscovrAdapter", "GoesAdapter", "SwpcAdapter"]
+__all__ = [
+    "BaseAdapter",
+    "CddisGimAdapter",
+    "DonkiAdapter",
+    "DscovrAdapter",
+    "GoesAdapter",
+    "SwpcAdapter",
+]

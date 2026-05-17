@@ -47,6 +47,15 @@ pyspedas = [
     "pyspedas>=1.6",
     "cdflib>=1.0",
 ]
+# CDDIS GIM adapter: NASA Earthdata Login (URS) handshake is fiddly; the
+# `earthaccess` library handles it cleanly. Optional because users without
+# Earthdata credentials don't need it, and the adapter has a manual
+# httpx + HTTP-Basic fallback. `unlzw3` decompresses pre-2023 .Z legacy
+# files without shelling out to gzip; pure-Python fallback also ships.
+earthdata = [
+    "earthaccess>=0.10",
+    "unlzw3>=0.2.2",
+]
 dev = [
     "ruff>=0.4",
     "mypy>=1.10",

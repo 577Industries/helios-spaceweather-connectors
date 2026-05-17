@@ -5,6 +5,24 @@ All notable changes to this project are documented here, following [Keep a Chang
 ## [Unreleased]
 
 ### Added
+- `CddisGimAdapter` — NASA CDDIS Global Ionosphere Maps (vertical TEC at
+  2-hour cadence on 2.5-by-5 deg grid). BUILD strategy: no maintained Python
+  client with Earthdata Login + IONEX parsing existed. Optional `[earthdata]`
+  extra installs `earthaccess` for the URS authentication handshake and
+  `unlzw3` for the legacy `.Z` IONEX decompression. The custom IONEX parser
+  is ~100 lines of pure Python (no `xarray` or `georinex` dep). Probes both
+  the 2023-present long-form `.gz` filename and the pre-2023 legacy short-form
+  `.Z` filename per request. Records carry the full 71x73 TEC grid (or a
+  single bilinearly-interpolated point) with TECU units and full provenance
+  including analysis-center lineage.
+- Synthetic-Gannon IONEX fixture (`tests/fixtures/cddis_gim/synthetic_gannon_2024131.inx`)
+  committed for offline tests; regenerator script kept alongside so the
+  assumed analytic TEC distribution stays auditable. Real-CDDIS smoke test
+  marked `@pytest.mark.live` for nightly runs once Earthdata creds are wired.
+- 57 unit tests + 1 live test on `CddisGimAdapter`, 87% line+branch coverage.
+  Critical Gannon-storm assertion: `fetch_tec_at_point(lat=40, lon=-83)`
+  across 2024-05-10 yields peak TEC > 30 TECU around 20 UTC, consistent
+  with the published Gannon-storm Midwest enhancement of >50 TECU.
 - `GoesAdapter` — GOES X-ray flux and integral proton flux. WRAP strategy with
   PySPEDAS for historical NCEI archive and NOAA SWPC near-real-time JSON for
   the last ~30 days. Intentional overlap with `SwpcAdapter` for proton flux;
