@@ -14,7 +14,7 @@ from helios_connectors.http import (
 
 def test_default_user_agent_is_repo_url() -> None:
     """The User-Agent must include the repo URL per NASA API etiquette."""
-    assert "github.com/577-Industries" in DEFAULT_USER_AGENT
+    assert "github.com/577Industries" in DEFAULT_USER_AGENT
     assert "helios-spaceweather-connectors" in DEFAULT_USER_AGENT
 
 

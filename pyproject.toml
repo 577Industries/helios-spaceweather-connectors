@@ -63,10 +63,10 @@ notebooks = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/577-Industries/helios-spaceweather-connectors"
-Repository = "https://github.com/577-Industries/helios-spaceweather-connectors.git"
-Issues = "https://github.com/577-Industries/helios-spaceweather-connectors/issues"
-Documentation = "https://577-industries.github.io/helios-spaceweather-connectors"
+Homepage = "https://github.com/577Industries/helios-spaceweather-connectors"
+Repository = "https://github.com/577Industries/helios-spaceweather-connectors.git"
+Issues = "https://github.com/577Industries/helios-spaceweather-connectors/issues"
+Documentation = "https://577industries.github.io/helios-spaceweather-connectors"
 
 [tool.hatch.version]
 path = "src/helios_connectors/__init__.py"

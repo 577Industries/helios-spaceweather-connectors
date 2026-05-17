@@ -13,8 +13,8 @@ keywords:
   - machine learning
   - provenance
 license: Apache-2.0
-repository-code: "https://github.com/577-Industries/helios-spaceweather-connectors"
-url: "https://github.com/577-Industries/helios-spaceweather-connectors"
+repository-code: "https://github.com/577Industries/helios-spaceweather-connectors"
+url: "https://github.com/577Industries/helios-spaceweather-connectors"
 type: software
 version: 0.0.0
 date-released: "2026-05-17"

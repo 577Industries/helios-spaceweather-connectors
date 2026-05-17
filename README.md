@@ -1,6 +1,6 @@
 # helios-spaceweather-connectors
 
-[![CI](https://github.com/577-Industries/helios-spaceweather-connectors/actions/workflows/ci.yml/badge.svg)](https://github.com/577-Industries/helios-spaceweather-connectors/actions/workflows/ci.yml) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![CI](https://github.com/577Industries/helios-spaceweather-connectors/actions/workflows/ci.yml/badge.svg)](https://github.com/577Industries/helios-spaceweather-connectors/actions/workflows/ci.yml) [![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![PyPI](https://img.shields.io/pypi/v/helios-spaceweather-connectors.svg)](https://pypi.org/project/helios-spaceweather-connectors/)
 
 > Production-grade Python adapters for six space-weather data sources (NASA DONKI, CCMC SEP Scoreboards A/B/C, NOAA SWPC, NASA CDDIS GIMs, GOES, DSCOVR), normalized to a common feature schema with feature-level provenance per helios-provenance-spec.
@@ -48,10 +48,10 @@ and [`examples/donki_quickstart.ipynb`](examples/donki_quickstart.ipynb).
 
 ## Documentation
 
-- **Master plan**: see [`helios-program`](https://github.com/577-Industries/helios-program) (private; internal team)
+- **Master plan**: see [`helios-program`](https://github.com/577Industries/helios-program) (private; internal team)
 - **Specification**: docs published at the project's docs site when available
 - **Provenance**: every output traces to its upstream model and transformation chain
-  via [`helios-provenance-spec`](https://github.com/577-Industries/helios-provenance-spec)
+  via [`helios-provenance-spec`](https://github.com/577Industries/helios-provenance-spec)
 
 ## License
 
@@ -69,6 +69,6 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Substantive changes should be discussed 
   title        = { helios-spaceweather-connectors: Production-grade Python adapters for six space-weather data sources (NASA DONKI, CCMC SEP Scoreboards A/B/C, NOAA SWPC, NASA CDDIS GIMs, GOES, DSCOVR), normalized to a common feature schema with feature-level provenance per helios-provenance-spec },
   year         = {2026},
   publisher    = {577 Industries Inc.},
-  url          = {https://github.com/577-Industries/helios-spaceweather-connectors},
+  url          = {https://github.com/577Industries/helios-spaceweather-connectors},
 }
 ```

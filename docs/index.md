@@ -4,7 +4,7 @@ Production-grade Python adapters for the space-weather data sources that
 feed the HELIOS fusion engine. Each adapter normalizes its upstream
 representation into a common `NormalizedRecord` shape with full
 feature-level provenance per the
-[`helios-provenance-spec`](https://github.com/577-Industries/helios-provenance-spec)
+[`helios-provenance-spec`](https://github.com/577Industries/helios-provenance-spec)
 contract.
 
 ## Adapter status
@@ -56,10 +56,10 @@ model, and how to add a new source.
 
 ## See also
 
-- [HELIOS program master plan](https://github.com/577-Industries/helios-program)
+- [HELIOS program master plan](https://github.com/577Industries/helios-program)
   (private; internal team)
-- [`helios-provenance-spec`](https://github.com/577-Industries/helios-provenance-spec)
+- [`helios-provenance-spec`](https://github.com/577Industries/helios-provenance-spec)
   — JSON Schema for the provenance model
-- [`helios-fusion-engine`](https://github.com/577-Industries/helios-fusion-engine)
+- [`helios-fusion-engine`](https://github.com/577Industries/helios-fusion-engine)
   — downstream consumer (BMA fusion + calibration)
 - NASA SBIR Phase I proposal — see proposal §2 Obj. 1 and §3 T1

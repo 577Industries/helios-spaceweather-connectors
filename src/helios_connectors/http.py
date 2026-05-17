@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 
 DEFAULT_USER_AGENT = (
     "helios-spaceweather-connectors/0.1.0 "
-    "(https://github.com/577-Industries/helios-spaceweather-connectors)"
+    "(https://github.com/577Industries/helios-spaceweather-connectors)"
 )
 
 # HTTP statuses we retry. 429 = rate-limited. 5xx = server-side glitch.

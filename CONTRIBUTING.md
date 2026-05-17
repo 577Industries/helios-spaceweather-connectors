@@ -12,7 +12,7 @@ just send the PR.
 ## Development setup
 
 ```bash
-git clone https://github.com/577-Industries/<repo>.git
+git clone https://github.com/577Industries/<repo>.git
 cd <repo>
 python3.12 -m venv .venv
 source .venv/bin/activate
@@ -31,7 +31,7 @@ pytest
 ## Provenance discipline
 
 Any new connector, transformation, or fused output that produces a value must emit a
-`ProvenanceRecord` per [`helios-provenance-spec`](https://github.com/577-Industries/helios-provenance-spec).
+`ProvenanceRecord` per [`helios-provenance-spec`](https://github.com/577Industries/helios-provenance-spec).
 PRs that produce values without a provenance record will be sent back for revision.
 
 ## License

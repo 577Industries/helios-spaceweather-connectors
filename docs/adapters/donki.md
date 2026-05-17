@@ -146,7 +146,7 @@ keeping in mind when relying on DONKI in production:
 ## Example notebook
 
 A runnable quickstart against the Gannon storm window lives at
-[`examples/donki_quickstart.ipynb`](https://github.com/577-Industries/helios-spaceweather-connectors/blob/main/examples/donki_quickstart.ipynb).
+[`examples/donki_quickstart.ipynb`](https://github.com/577Industries/helios-spaceweather-connectors/blob/main/examples/donki_quickstart.ipynb).
 Regenerate it from source via:
 
 ```bash
