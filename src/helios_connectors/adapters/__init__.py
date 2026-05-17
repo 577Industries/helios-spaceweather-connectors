@@ -10,5 +10,6 @@ from __future__ import annotations
 
 from .base import BaseAdapter
 from .donki import DonkiAdapter
+from .goes import GoesAdapter
 
-__all__ = ["BaseAdapter", "DonkiAdapter"]
+__all__ = ["BaseAdapter", "DonkiAdapter", "GoesAdapter"]

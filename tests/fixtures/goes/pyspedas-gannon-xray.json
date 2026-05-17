@@ -1,0 +1,30 @@
+[
+  {
+    "timestamp": 1715126400.0,
+    "value": 3.2e-07,
+    "units": "W/m^2",
+    "band": "0.05-0.4nm",
+    "record_type": "xray"
+  },
+  {
+    "timestamp": 1715126400.0,
+    "value": 1.8e-06,
+    "units": "W/m^2",
+    "band": "0.1-0.8nm",
+    "record_type": "xray"
+  },
+  {
+    "timestamp": 1715212800.0,
+    "value": 4.1e-05,
+    "units": "W/m^2",
+    "band": "0.05-0.4nm",
+    "record_type": "xray"
+  },
+  {
+    "timestamp": 1715212800.0,
+    "value": 8.7e-05,
+    "units": "W/m^2",
+    "band": "0.1-0.8nm",
+    "record_type": "xray"
+  }
+]
