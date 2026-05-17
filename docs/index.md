@@ -13,7 +13,7 @@ contract.
 |---|---|---|---|
 | NASA DONKI (CME, FLR, SEP, GST, IPS, MPC, RBE, HSS, notifications) | BUILD | **v0.1 — shipped** | [`adapters.donki`](adapters/donki.md) |
 | CCMC SEP Scoreboards A / B / C | BUILD | Planned (v0.2) | `adapters.sep_scoreboard` |
-| NOAA SWPC (Kp, plasma, mag, SEP forecast JSON) | EXTEND (SunPy where possible) | Planned (v0.2) | `adapters.swpc` |
+| NOAA SWPC (Kp, plasma, mag, SEP forecast JSON) + GFZ/Kyoto archive fallback | EXTEND | **v0.2 — shipped** | [`adapters.swpc`](adapters/swpc.md) |
 | NASA CDDIS GIMs (IONEX) | BUILD | Planned (v0.3) | `adapters.cddis_gim` |
 | GOES X-ray + proton flux | WRAP (PySPEDAS / SWPC NRT JSON) | Planned (v0.3) | `adapters.goes` |
 | DSCOVR upstream solar wind | WRAP (PySPEDAS / NOAA NRT JSON) | Planned (v0.3) | `adapters.dscovr` |
