@@ -8,6 +8,55 @@ from pathlib import Path
 import pytest
 
 FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "donki"
+SWPC_FIXTURES_ROOT = Path(__file__).parent / "fixtures" / "swpc"
+
+
+@pytest.fixture(scope="session")
+def swpc_fixtures_root() -> Path:
+    """Return the directory holding SWPC fixtures (real + archive)."""
+    return SWPC_FIXTURES_ROOT
+
+
+@pytest.fixture(scope="session")
+def swpc_kp_realtime_fixture() -> list[dict[str, object]]:
+    """Real SWPC Kp planetary index response (current month snapshot)."""
+    return json.loads((SWPC_FIXTURES_ROOT / "kp-realtime.json").read_text())
+
+
+@pytest.fixture(scope="session")
+def swpc_plasma_fixture() -> list[list[object]]:
+    """Real SWPC plasma-7-day response (header + ~1 hour of rows)."""
+    return json.loads((SWPC_FIXTURES_ROOT / "plasma-7-day.json").read_text())
+
+
+@pytest.fixture(scope="session")
+def swpc_mag_fixture() -> list[list[object]]:
+    """Real SWPC mag-7-day response (header + ~1 hour of rows)."""
+    return json.loads((SWPC_FIXTURES_ROOT / "mag-7-day.json").read_text())
+
+
+@pytest.fixture(scope="session")
+def swpc_protons_fixture() -> list[dict[str, object]]:
+    """Real SWPC GOES integral-protons-7-day response (40 rows)."""
+    return json.loads((SWPC_FIXTURES_ROOT / "goes-protons-7-day.json").read_text())
+
+
+@pytest.fixture(scope="session")
+def swpc_sep_forecast_fixture() -> str:
+    """Real SWPC 3-day forecast text product."""
+    return (SWPC_FIXTURES_ROOT / "sep-forecast.txt").read_text()
+
+
+@pytest.fixture(scope="session")
+def gfz_kp_archive_fixture() -> str:
+    """GFZ Potsdam Kp archive slice for May 2024 (31 days)."""
+    return (SWPC_FIXTURES_ROOT / "gfz-kp-2024-05.txt").read_text()
+
+
+@pytest.fixture(scope="session")
+def kyoto_dst_2405_fixture() -> str:
+    """Kyoto WDC provisional Dst for May 2024."""
+    return (SWPC_FIXTURES_ROOT / "kyoto-dst-2405.html").read_text()
 
 
 @pytest.fixture(scope="session")

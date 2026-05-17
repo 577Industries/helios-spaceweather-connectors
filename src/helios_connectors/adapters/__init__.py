@@ -12,5 +12,6 @@ from .base import BaseAdapter
 from .donki import DonkiAdapter
 from .dscovr import DscovrAdapter
 from .goes import GoesAdapter
+from .swpc import SwpcAdapter
 
-__all__ = ["BaseAdapter", "DonkiAdapter", "DscovrAdapter", "GoesAdapter"]
+__all__ = ["BaseAdapter", "DonkiAdapter", "DscovrAdapter", "GoesAdapter", "SwpcAdapter"]

@@ -1,8 +1,7 @@
 """helios-spaceweather-connectors: production-grade adapters for space-weather data sources.
 
 This package exposes a uniform :class:`~helios_connectors.adapters.base.BaseAdapter`
-interface plus one concrete adapter per upstream source (DONKI first; SWPC,
-CDDIS GIMs, SEP Scoreboards, GOES, DSCOVR to follow). Every adapter emits
+interface plus one concrete adapter per upstream source. Every adapter emits
 :class:`~helios_connectors.schema.NormalizedRecord` objects with full
 provenance metadata.
 
@@ -29,6 +28,7 @@ from .adapters.base import BaseAdapter
 from .adapters.donki import DonkiAdapter
 from .adapters.dscovr import DscovrAdapter
 from .adapters.goes import GoesAdapter
+from .adapters.swpc import SwpcAdapter
 from .cache import CacheKey, FileCache, default_cache_root
 from .http import DEFAULT_USER_AGENT, make_client
 from .ratelimit import RateLimitConfig, RateLimiter
@@ -49,6 +49,7 @@ __all__ = [
     "RateLimitConfig",
     "RateLimiter",
     "SourceID",
+    "SwpcAdapter",
     "__version__",
     "default_cache_root",
     "make_client",
