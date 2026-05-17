@@ -1,4 +1,5 @@
 """Smoke tests: import the package and confirm version is well-formed."""
+
 from __future__ import annotations
 
 import re

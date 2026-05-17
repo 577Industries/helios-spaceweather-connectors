@@ -1,0 +1,1403 @@
+[
+  {
+    "activityID": "2024-05-08T05:36:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2024-05-08T05:36Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "S22W10",
+    "activeRegionNum": 13664,
+    "note": "Earth-directed full halo seen in all coronagraphs. The source is a large eruption from AR 3664, which included two flares seen in SDO AIA 131, an initial M3.5 (S21W10) followed by the main long-duration X1.0 (S22W10) which peaked at 2024-05-08T04:30Z and 2024-05-08T05:09Z respectively. An EUV wave and field line movement is observed in SDO AIA 94/131/171/211 with some surface brightening in SDO AIA 304. This flare+CME combo resulted in a small rise in protons observed at SOHO and GOES, but not enough for a threshold crossing.",
+    "submissionTime": "2024-05-08T18:22Z",
+    "versionId": 2,
+    "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CME/30589/-1",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-08T09:30Z",
+        "latitude": -7.0,
+        "longitude": 9.0,
+        "halfAngle": 43.0,
+        "speed": 870.0,
+        "type": "C",
+        "featureCode": "LE",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "BULK measurement using both coronagraphs to triangulate the same features, using AR 3664 as the source. This CME front is notably asymmetric in all imagery, but there is high confidence in all three \"nodes\" in different directions pertaining to the same CME front directed towards Earth from this same eruption. The right hand boundary was mainly used, matching the half-width to the peaks of each node of the asymmetric front, which tracked surprisingly well once aligned.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 21.3,
+        "submissionTime": "2025-03-12T16:52Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30590/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-08T18:23Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T12:14Z",
+            "estimatedDuration": 22.3,
+            "rmin_re": 5.3,
+            "kp_18": null,
+            "kp_90": 6,
+            "kp_135": 7,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30591/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T08:48Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:28Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Parker Solar Probe",
+                "arrivalTime": "2024-05-10T13:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-08T18:42Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T12:19Z",
+            "estimatedDuration": 13.3,
+            "rmin_re": 5.0,
+            "kp_18": null,
+            "kp_90": 6,
+            "kp_135": 7,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30593/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T08:42Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:27Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Parker Solar Probe",
+                "arrivalTime": "2024-05-10T13:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:28Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T13:03Z",
+            "estimatedDuration": 22.4,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30651/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:05Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:53Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:46Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-10T12:50Z",
+            "estimatedDuration": 22.1,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30652/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:00Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:47Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Psyche",
+                "arrivalTime": "2024-05-16T00:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          }
+        ]
+      },
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-08T09:47Z",
+        "latitude": -15.0,
+        "longitude": 15.0,
+        "halfAngle": 45.0,
+        "speed": 729.0,
+        "type": "C",
+        "featureCode": "SH",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "SHOCK measurement made using both coronagraphs. Source of AR 3664 (S22W10) used as a basis finding a good triangulation between coronagraphs near here, mainly tracking the southern portion of the front as it is the most visible and distinguishable amongst the rest of the complex running difference imagery at this time.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 17.0,
+        "submissionTime": "2024-05-08T19:50Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30597/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-08T19:56Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T18:29Z",
+            "estimatedDuration": 21.5,
+            "rmin_re": 5.6,
+            "kp_18": null,
+            "kp_90": 5,
+            "kp_135": 7,
+            "kp_180": 7,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30645/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T18:06Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T12:58Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2024-05-08T04:20:00-FLR-001"
+      },
+      {
+        "activityID": "2024-05-08T04:37:00-FLR-001"
+      },
+      {
+        "activityID": "2024-05-10T13:35:00-SEP-001"
+      },
+      {
+        "activityID": "2024-05-10T14:00:00-IPS-001"
+      },
+      {
+        "activityID": "2024-05-10T15:00:00-GST-001"
+      },
+      {
+        "activityID": "2024-05-10T16:36:00-IPS-001"
+      },
+      {
+        "activityID": "2024-05-10T18:01:00-MPC-001"
+      },
+      {
+        "activityID": "2024-05-15T13:55:00-RBE-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20240508-AL-012",
+        "messageIssueTime": "2024-05-08T18:43Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30592/1"
+      },
+      {
+        "messageID": "20240509-AL-010",
+        "messageIssueTime": "2024-05-09T21:24Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30653/1"
+      }
+    ]
+  },
+  {
+    "activityID": "2024-05-08T12:24:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2024-05-08T12:24Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "S20W11",
+    "activeRegionNum": 13664,
+    "note": "Earth-directed full halo seen in all coronagraphs. The source is a large eruption from AR 3664, which included a long-duration M8.6 flare (S22W11) which peaked at 2024-05-08T12:04Z best seen in SDO AIA 131. An EUV wave and field line movement is observed in SDO AIA 94/131/171/211 with some surface brightening in SDO AIA 304. This flare+CME combo resulted in a small rise in protons observed at SOHO and GOES, but not enough for a threshold crossing. The start time used here is when the shock front emerges, with the brighter bulk front emerging ~2024-05-08T13:00Z.",
+    "submissionTime": "2024-05-08T15:46Z",
+    "versionId": 1,
+    "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CME/30564/-1",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-08T16:58Z",
+        "latitude": -5.0,
+        "longitude": 3.0,
+        "halfAngle": 45.0,
+        "speed": 776.0,
+        "type": "C",
+        "featureCode": "LE",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "Preliminary BULK measurement made using both coronagraphs, with limited imagery due to a current gap between SOHO downlinks due to resume at T17:15Z today and recency of the front emerging in all imagery. Source of S22W11 (the M8.6-Class flare) used as a basis, finding a good triangulation between SOHO and STEREO with some NE deflection.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 13.1,
+        "submissionTime": "2024-05-08T16:38Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30565/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-08T16:18Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-11T01:39Z",
+            "estimatedDuration": 24.8,
+            "rmin_re": 5.4,
+            "kp_18": null,
+            "kp_90": 5,
+            "kp_135": 7,
+            "kp_180": 7,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30568/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-13T03:59Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T20:45Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Parker Solar Probe",
+                "arrivalTime": "2024-05-10T10:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T12:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-08T18:42Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T12:19Z",
+            "estimatedDuration": 13.3,
+            "rmin_re": 5.0,
+            "kp_18": null,
+            "kp_90": 6,
+            "kp_135": 7,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30593/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T08:42Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:27Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Parker Solar Probe",
+                "arrivalTime": "2024-05-10T13:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:28Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T13:03Z",
+            "estimatedDuration": 22.4,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30651/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:05Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:53Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:46Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-10T12:50Z",
+            "estimatedDuration": 22.1,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30652/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:00Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:47Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Psyche",
+                "arrivalTime": "2024-05-16T00:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          }
+        ]
+      },
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-08T15:16Z",
+        "latitude": -15.0,
+        "longitude": 8.0,
+        "halfAngle": 43.0,
+        "speed": 1156.0,
+        "type": "O",
+        "featureCode": "SH",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "Preliminary SHOCK measurement made using both coronagraphs, with limited imagery due to a current gap between SOHO downlinks due to resume at T17:15Z today and recency of the front emerging in all imagery. Source of S22W11 (the M8.6-Class flare) used as a basis finding a good triangulation between coronagraphs near here.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 19.2,
+        "submissionTime": "2024-05-08T16:38Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30573/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-08T16:45Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T12:12Z",
+            "estimatedDuration": 26.4,
+            "rmin_re": 5.2,
+            "kp_18": null,
+            "kp_90": 6,
+            "kp_135": 8,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30576/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T06:55Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:52Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Parker Solar Probe",
+                "arrivalTime": "2024-05-10T10:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T12:24:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2024-05-08T11:26:00-FLR-001"
+      },
+      {
+        "activityID": "2024-05-10T13:35:00-SEP-001"
+      },
+      {
+        "activityID": "2024-05-10T14:00:00-IPS-001"
+      },
+      {
+        "activityID": "2024-05-10T14:50:00-SEP-001"
+      },
+      {
+        "activityID": "2024-05-10T15:00:00-GST-001"
+      },
+      {
+        "activityID": "2024-05-10T16:36:00-IPS-001"
+      },
+      {
+        "activityID": "2024-05-10T18:01:00-MPC-001"
+      },
+      {
+        "activityID": "2024-05-15T13:55:00-RBE-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20240508-AL-009",
+        "messageIssueTime": "2024-05-08T16:50Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30575/1"
+      },
+      {
+        "messageID": "20240509-AL-010",
+        "messageIssueTime": "2024-05-09T21:24Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30653/1"
+      }
+    ]
+  },
+  {
+    "activityID": "2024-05-08T19:12:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2024-05-08T19:12Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "N10E20",
+    "activeRegionNum": 13667,
+    "note": "This CME is visible to the northeast in SOHO LASCO C2/C3 and in STEREO A COR2 for a few frames prior to and following a data gap lasting from 2024-05-08T19:53Z to 2024-05-09T01:53Z. The source is a filament eruption near Active Region 13667 (N26E22) starting around 2024-05-08T18:07Z as seen in SDO AIA 131, 171, 193, 304 imagery. Filament material can be seen against the backdrop of the East limb as the material continues to leave the field of view in SDO AIA 304 around 19:35Z. A large dimming area is seen in SDO AIA 193 at this time, which appears to move southwest of the eruption site. Additionally, some post-eruptive arcades are seen in SDO AIA 171/193 starting around 20:00Z.",
+    "submissionTime": "2024-05-12T20:38Z",
+    "versionId": 2,
+    "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CME/30612/-1",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-08T23:27Z",
+        "latitude": 3.0,
+        "longitude": -23.0,
+        "halfAngle": 38.0,
+        "speed": 828.0,
+        "type": "C",
+        "featureCode": "LE",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "Uses source location and best stereoscopic fit. Only two frames of STEREO A COR2 difference imagery were used, due to a data gap lasting from 2024-05-08T19:53Z to 2024-05-09T01:53Z.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 15.0,
+        "submissionTime": "2024-05-09T16:10Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30613/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-09T15:47Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-11T06:51Z",
+            "estimatedDuration": 25.6,
+            "rmin_re": 5.8,
+            "kp_18": null,
+            "kp_90": 5,
+            "kp_135": 7,
+            "kp_180": 7,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30617/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-11T06:45Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-14T00:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T19:12:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T16:12Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-11T06:42Z",
+            "estimatedDuration": 25.3,
+            "rmin_re": 5.8,
+            "kp_18": null,
+            "kp_90": 5,
+            "kp_135": 6,
+            "kp_180": 7,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30622/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-11T06:42Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-14T00:00Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Psyche",
+                "arrivalTime": "2024-05-15T20:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T19:12:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:28Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T13:03Z",
+            "estimatedDuration": 22.4,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30651/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:05Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:53Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:46Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-10T12:50Z",
+            "estimatedDuration": 22.1,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30652/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:00Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:47Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Psyche",
+                "arrivalTime": "2024-05-16T00:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2024-05-10T14:00:00-IPS-001"
+      },
+      {
+        "activityID": "2024-05-10T15:00:00-GST-001"
+      },
+      {
+        "activityID": "2024-05-10T16:36:00-IPS-001"
+      },
+      {
+        "activityID": "2024-05-10T18:01:00-MPC-001"
+      },
+      {
+        "activityID": "2024-05-15T13:55:00-RBE-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20240509-AL-005",
+        "messageIssueTime": "2024-05-09T16:39Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30624/1"
+      },
+      {
+        "messageID": "20240509-AL-010",
+        "messageIssueTime": "2024-05-09T21:24Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30653/1"
+      }
+    ]
+  },
+  {
+    "activityID": "2024-05-08T22:24:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2024-05-08T22:24Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "S20W17",
+    "activeRegionNum": 13664,
+    "note": "Full halo CME with a bulk portion visible to the southwest in SOHO LASCO C2/C3 and STEREO A COR2 imagery following a data gap in STEREO A COR2 lasting from 2024-05-08T19:53Z to 2024-05-09T01:53Z. The source is a large eruption and accompanying X1.0 and M9.8 flares from Active Region 13664 (S20W17) staring around 2024-05-08T21:08Z. Two rising loops are seen from Active Region 13664 (S20W17) staring around 2024-05-08T21:29Z and 22:08Z, respectively, as seen in SDO AIA 193/131, which likely resulted in two leading edges which very quickly combine in early frames of SOHO LASCO C2 imagery, and thus are considered one CME. A wide EUV wave and widely opening field lines are seen in SDO AIA 171/193.",
+    "submissionTime": "2024-05-10T19:20Z",
+    "versionId": 3,
+    "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CME/30640/-1",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-09T00:51Z",
+        "latitude": -6.0,
+        "longitude": 5.0,
+        "halfAngle": 45.0,
+        "speed": 1257.0,
+        "type": "O",
+        "featureCode": "SH",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "Measurement of the SHOCK using the source location seen in UV imagery. Only C3 difference imagery used. No imagery available from STEREO A COR2 due to data gap lasting from 2024-05-08T19:53Z to 2024-05-09T01:53Z.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 28.0,
+        "submissionTime": "2024-05-09T20:22Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30641/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-09T19:47Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T18:10Z",
+            "estimatedDuration": 26.6,
+            "rmin_re": 4.9,
+            "kp_18": null,
+            "kp_90": 7,
+            "kp_135": 8,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30647/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T12:38Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T15:08Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T22:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:17Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-10T18:09Z",
+            "estimatedDuration": 25.6,
+            "rmin_re": 4.9,
+            "kp_18": null,
+            "kp_90": 7,
+            "kp_135": 8,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30650/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T12:40Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T15:12Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T22:24:00-CME-001"
+            ]
+          }
+        ]
+      },
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-09T01:43Z",
+        "latitude": -16.0,
+        "longitude": 12.0,
+        "halfAngle": 40.0,
+        "speed": 1130.0,
+        "type": "O",
+        "featureCode": "LE",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "Measurement of the BULK using the source location seen in UV imagery. Only C3 difference imagery used. No imagery available from STEREO A COR2 due to data gap lasting from 2024-05-08T19:53Z to 2024-05-09T01:53Z.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 25.0,
+        "submissionTime": "2024-05-09T19:28Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30642/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-09T19:32Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T23:46Z",
+            "estimatedDuration": 25.0,
+            "rmin_re": 5.3,
+            "kp_18": null,
+            "kp_90": 6,
+            "kp_135": 7,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30644/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T18:10Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T19:07Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T22:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T19:50Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-10T23:45Z",
+            "estimatedDuration": 24.5,
+            "rmin_re": 5.2,
+            "kp_18": null,
+            "kp_90": 6,
+            "kp_135": 7,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30648/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T18:12Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T19:12Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T22:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:28Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T13:03Z",
+            "estimatedDuration": 22.4,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30651/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:05Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:53Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:46Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-10T12:50Z",
+            "estimatedDuration": 22.1,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30652/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:00Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:47Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Psyche",
+                "arrivalTime": "2024-05-16T00:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2024-05-08T21:08:00-FLR-001"
+      },
+      {
+        "activityID": "2024-05-08T22:05:00-FLR-001"
+      },
+      {
+        "activityID": "2024-05-10T13:35:00-SEP-001"
+      },
+      {
+        "activityID": "2024-05-10T14:50:00-SEP-001"
+      },
+      {
+        "activityID": "2024-05-10T15:00:00-GST-001"
+      },
+      {
+        "activityID": "2024-05-10T18:01:00-MPC-001"
+      },
+      {
+        "activityID": "2024-05-11T09:30:00-IPS-001"
+      },
+      {
+        "activityID": "2024-05-15T13:55:00-RBE-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20240509-AL-009",
+        "messageIssueTime": "2024-05-09T20:03Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30649/1"
+      },
+      {
+        "messageID": "20240509-AL-010",
+        "messageIssueTime": "2024-05-09T21:24Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30653/1"
+      }
+    ]
+  },
+  {
+    "activityID": "2024-05-09T09:24:00-CME-001",
+    "catalog": "M2M_CATALOG",
+    "startTime": "2024-05-09T09:24Z",
+    "instruments": [
+      {
+        "displayName": "SOHO: LASCO/C2"
+      },
+      {
+        "displayName": "SOHO: LASCO/C3"
+      },
+      {
+        "displayName": "STEREO A: SECCHI/COR2"
+      }
+    ],
+    "sourceLocation": "S20W25",
+    "activeRegionNum": 13664,
+    "note": "Halo CME visible in SOHO LASCO C2, C3, and STEREO A COR2 imagery. This halo is associated with the X2.2 class flare from AR13664 peaking at 2024-05-09T09:13Z. A clear EUV wave is visible in SDO/AIA 193 and 211 crossing towards the central meridian and towards the limb in the southwest. Post-eruptive arcades are present in SDO/AIA 193 and 131. Brightening is visible in SDO/AIA 304.",
+    "submissionTime": "2024-05-09T16:26Z",
+    "versionId": 1,
+    "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CME/30619/-1",
+    "cmeAnalyses": [
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-09T11:56Z",
+        "latitude": -6.0,
+        "longitude": 19.0,
+        "halfAngle": 45.0,
+        "speed": 1330.0,
+        "type": "O",
+        "featureCode": "LE",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "These parameters are based on the best fit of the BULK of the CME. Measured speeds varied between 1200km/s to 1500km/s.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 21.2,
+        "submissionTime": "2024-05-09T16:28Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30620/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-09T16:43Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-11T05:02Z",
+            "estimatedDuration": 27.2,
+            "rmin_re": 5.0,
+            "kp_18": null,
+            "kp_90": 6,
+            "kp_135": 8,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30626/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T21:29Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-11T01:10Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T17:00Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-11T05:04Z",
+            "estimatedDuration": 26.2,
+            "rmin_re": 5.0,
+            "kp_18": null,
+            "kp_90": 6,
+            "kp_135": 8,
+            "kp_180": 8,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30633/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T21:31Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-11T01:15Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:28Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T13:03Z",
+            "estimatedDuration": 22.4,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30651/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:05Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:53Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T20:46Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-10T12:50Z",
+            "estimatedDuration": 22.1,
+            "rmin_re": 4.1,
+            "kp_18": null,
+            "kp_90": 8,
+            "kp_135": 9,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30652/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T04:00Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T07:47Z"
+              },
+              {
+                "isGlancingBlow": true,
+                "isMinorImpact": false,
+                "location": "Psyche",
+                "arrivalTime": "2024-05-16T00:00Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-08T05:36:00-CME-001",
+              "2024-05-08T12:24:00-CME-001",
+              "2024-05-08T19:12:00-CME-001",
+              "2024-05-08T22:24:00-CME-001",
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          }
+        ]
+      },
+      {
+        "isMostAccurate": true,
+        "time21_5": "2024-05-09T11:21Z",
+        "latitude": -12.0,
+        "longitude": 14.0,
+        "halfAngle": 45.0,
+        "speed": 1561.0,
+        "type": "O",
+        "featureCode": "SH",
+        "imageType": "running difference",
+        "measurementTechnique": "SWPC_CAT",
+        "note": "SHOCK parameters based off of best fit in SOHO LASCO C3 and STEREO A COR2 imagery.",
+        "levelOfData": 0,
+        "tilt": null,
+        "minorHalfWidth": null,
+        "speedMeasuredAtHeight": 25.6,
+        "submissionTime": "2024-05-09T18:45Z",
+        "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/CMEAnalysis/30638/-1",
+        "enlilList": [
+          {
+            "modelCompletionTime": "2024-05-09T19:00Z",
+            "au": 2.0,
+            "estimatedShockArrivalTime": "2024-05-10T23:45Z",
+            "estimatedDuration": 26.2,
+            "rmin_re": 4.9,
+            "kp_18": null,
+            "kp_90": 7,
+            "kp_135": 8,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30639/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T11:16Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T20:03Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          },
+          {
+            "modelCompletionTime": "2024-05-09T19:18Z",
+            "au": 5.5,
+            "estimatedShockArrivalTime": "2024-05-10T23:51Z",
+            "estimatedDuration": 25.1,
+            "rmin_re": 4.8,
+            "kp_18": null,
+            "kp_90": 7,
+            "kp_135": 8,
+            "kp_180": 9,
+            "isEarthGB": false,
+            "isEarthMinorImpact": false,
+            "link": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/WSA-ENLIL/30643/-1",
+            "impactList": [
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "Lucy",
+                "arrivalTime": "2024-05-12T11:18Z"
+              },
+              {
+                "isGlancingBlow": false,
+                "isMinorImpact": false,
+                "location": "STEREO A",
+                "arrivalTime": "2024-05-10T20:17Z"
+              }
+            ],
+            "cmeIDs": [
+              "2024-05-09T09:24:00-CME-001"
+            ]
+          }
+        ]
+      }
+    ],
+    "linkedEvents": [
+      {
+        "activityID": "2024-05-09T08:45:00-FLR-001"
+      },
+      {
+        "activityID": "2024-05-10T13:35:00-SEP-001"
+      },
+      {
+        "activityID": "2024-05-10T14:50:00-SEP-001"
+      },
+      {
+        "activityID": "2024-05-10T15:00:00-GST-001"
+      },
+      {
+        "activityID": "2024-05-10T18:01:00-MPC-001"
+      },
+      {
+        "activityID": "2024-05-11T09:30:00-IPS-001"
+      },
+      {
+        "activityID": "2024-05-15T13:55:00-RBE-001"
+      }
+    ],
+    "sentNotifications": [
+      {
+        "messageID": "20240509-AL-006",
+        "messageIssueTime": "2024-05-09T17:04Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30628/1"
+      },
+      {
+        "messageID": "20240509-AL-010",
+        "messageIssueTime": "2024-05-09T21:24Z",
+        "messageURL": "https://kauai.ccmc.gsfc.nasa.gov/DONKI/view/Alert/30653/1"
+      }
+    ]
+  }
+]

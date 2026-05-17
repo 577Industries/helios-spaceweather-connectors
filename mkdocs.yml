@@ -42,3 +42,6 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Adapter pattern: design.md
+  - Adapters:
+      - DONKI: adapters/donki.md
