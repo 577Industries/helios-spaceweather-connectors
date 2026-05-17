@@ -5,6 +5,10 @@ All notable changes to this project are documented here, following [Keep a Chang
 ## [Unreleased]
 
 ### Added
+- `GoesAdapter` — GOES X-ray flux and integral proton flux. WRAP strategy with
+  PySPEDAS for historical NCEI archive and NOAA SWPC near-real-time JSON for
+  the last ~30 days. Intentional overlap with `SwpcAdapter` for proton flux;
+  records distinguished by `source_id` and lineage.
 - Adapter pattern foundation: `BaseAdapter` abstract class with async streaming `fetch()`, sync wrapper, common provenance emission.
 - File cache (parquet, content-addressed) and async token-bucket rate limiter.
 - Shared httpx client with NASA-etiquette User-Agent, dual-endpoint failover (api.nasa.gov ↔ kauai.ccmc.gsfc.nasa.gov), retry-with-backoff.

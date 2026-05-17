@@ -1,0 +1,65 @@
+[
+  {
+    "timestamp": 1715126400.0,
+    "value": 0.31,
+    "units": "pfu",
+    "threshold_mev": 10,
+    "record_type": "protons"
+  },
+  {
+    "timestamp": 1715126400.0,
+    "value": 0.012,
+    "units": "pfu",
+    "threshold_mev": 50,
+    "record_type": "protons"
+  },
+  {
+    "timestamp": 1715126400.0,
+    "value": 0.003,
+    "units": "pfu",
+    "threshold_mev": 100,
+    "record_type": "protons"
+  },
+  {
+    "timestamp": 1715212800.0,
+    "value": 12.5,
+    "units": "pfu",
+    "threshold_mev": 10,
+    "record_type": "protons"
+  },
+  {
+    "timestamp": 1715212800.0,
+    "value": 0.84,
+    "units": "pfu",
+    "threshold_mev": 50,
+    "record_type": "protons"
+  },
+  {
+    "timestamp": 1715212800.0,
+    "value": 0.21,
+    "units": "pfu",
+    "threshold_mev": 100,
+    "record_type": "protons"
+  },
+  {
+    "timestamp": 1715299200.0,
+    "value": 145.7,
+    "units": "pfu",
+    "threshold_mev": 10,
+    "record_type": "protons"
+  },
+  {
+    "timestamp": 1715299200.0,
+    "value": 8.4,
+    "units": "pfu",
+    "threshold_mev": 50,
+    "record_type": "protons"
+  },
+  {
+    "timestamp": 1715299200.0,
+    "value": 1.6,
+    "units": "pfu",
+    "threshold_mev": 100,
+    "record_type": "protons"
+  }
+]

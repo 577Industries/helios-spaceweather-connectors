@@ -48,14 +48,18 @@ class SourceID(StrEnum):
     SEP_SCOREBOARD_A = "sep_scoreboard_a"
     SEP_SCOREBOARD_B = "sep_scoreboard_b"
     SEP_SCOREBOARD_C = "sep_scoreboard_c"
+    SWPC = "swpc"
     SWPC_KP = "swpc_kp"
     SWPC_PLASMA = "swpc_plasma"
     SWPC_MAG = "swpc_mag"
     SWPC_SEP_FORECAST = "swpc_sep_forecast"
     CDDIS_GIM = "cddis_gim"
+    GOES = "goes"
     GOES_XRAY = "goes_xray"
     GOES_PROTON = "goes_proton"
     DSCOVR = "dscovr"
+    DSCOVR_MAG = "dscovr_mag"
+    DSCOVR_PLASMA = "dscovr_plasma"
 
 
 @dataclass(frozen=True, slots=True)
