@@ -72,3 +72,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Substantive changes should be discussed 
   url          = {https://github.com/577Industries/helios-spaceweather-connectors},
 }
 ```
+
+## Related
+
+- **HELIOS program**: [`helios-program`](https://github.com/577Industries/helios-program) — master plan, proposal companion document, orchestration scripts.
+- **Wave 1 review pack**: [Artifact B foundation review pack](https://github.com/577Industries/helios-program/blob/main/specs/2026-05-17-B-connectors-foundation-review-pack.md) — adapter-pattern design notes and the 7 DONKI API quirks documented for follow-up adapter agents.
+- **Provenance schema**: [`helios-provenance-spec`](https://github.com/577Industries/helios-provenance-spec) — the JSON Schema and pydantic models this package emits for every fetched record.
+- **Downstream consumer**: [`helios-fusion-engine`](https://github.com/577Industries/helios-fusion-engine) — uses these adapters to fuse multi-source space-weather signals.
