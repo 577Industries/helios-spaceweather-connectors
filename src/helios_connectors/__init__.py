@@ -25,6 +25,7 @@ See ``docs/`` for the adapter pattern and per-source reference docs.
 from __future__ import annotations
 
 from .adapters.base import BaseAdapter
+from .adapters.cddis_gim import CddisGimAdapter
 from .adapters.donki import DonkiAdapter
 from .adapters.dscovr import DscovrAdapter
 from .adapters.goes import GoesAdapter
@@ -40,6 +41,7 @@ __all__ = [
     "DEFAULT_USER_AGENT",
     "BaseAdapter",
     "CacheKey",
+    "CddisGimAdapter",
     "DonkiAdapter",
     "DscovrAdapter",
     "FileCache",
