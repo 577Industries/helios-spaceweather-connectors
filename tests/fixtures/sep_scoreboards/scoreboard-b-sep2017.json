@@ -1,0 +1,49 @@
+{"sep_forecast_submission":{
+"contacts":[ {"name": "Ian Richardson", "email": "ian.g.richardson@nasa.gov" } ],
+"model": {"short_name": "SEPSTER", "spase_id": "spase://CCMC/SimulationModel/SEPSTER/v20190101" },
+"issue_time": "2017-09-08T04:17Z",
+ "mode": "historical",
+"triggers": [
+{"cme": {
+ "start_time": "2017-09-08T04:17Z",
+"lat": -5.000000,
+"lon": 53.000000,
+"speed": 442.000000,
+"half_width": 21.000000,
+"coordinates": "HEEQ"
+}
+}
+],
+"forecasts": [
+{"energy_channel": {"min" : 14, "max": 24, "units": "MeV^-1*s^-1*cm^-2*sr^-1"},
+"species": "proton",
+"location": "earth",
+"prediction_window":{"start_time": "2017-09-08T04:17Z", "end_time": "2017-09-08T04:17Z"},
+"peak_intensity": {"intensity":   5.53E-02, "units": "MeV^-1*s^-1*cm^-2*sr^-1","time":"2017-09-08T13:14Z"}
+},
+{"energy_channel": {"min": 10, "max": -1, "units": "pfu"},
+"species": "proton",
+"location": "earth",
+"prediction_window": {"start_time": "2017-09-08T04:17Z", "end_time": "2017-09-08T04:17Z"},
+"peak_intensity": {"intensity":  1.11E+00, "units": "pfu"},
+"all_clear": {"all_clear_boolean": true, "threshold": 10, "threshold_units": "pfu"}
+},
+{"energy_channel":{"min": 30, "max": -1, "units": "pfu"},
+"species": "proton",
+"location": "earth",
+"prediction_window": {"start_time": "2017-09-08T04:17Z", "end_time": "2017-09-08T04:17Z"},
+"peak_intensity": {"intensity":   1.11E-01, "units": "pfu"}
+},{"energy_channel":{"min": 50, "max": -1,  "units": "pfu"},
+"species": "proton", "location": "earth",
+"prediction_window": {"start_time": "2017-09-08T04:17Z", "end_time": "2017-09-08T04:17Z"},
+"peak_intensity": {"intensity":   5.53E-02, "units": "pfu"}
+},
+{"energy_channel": {"min": 100, "max": -1, "units": "pfu"},
+"species": "proton",
+"location": "earth",
+"prediction_window": {"start_time": "2017-09-08T04:17Z", "end_time": "2017-09-08T04:17Z"},
+"peak_intensity":{"intensity":   1.11E-02, "units": "pfu"}
+}
+]
+}
+}

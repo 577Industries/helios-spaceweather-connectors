@@ -1,0 +1,22 @@
+{"sep_forecast_submission":
+{"model": { "short_name": "UMASEP-10",
+   "spase_id": "spase://CCMC/SimulationModel/UMASEP/v3" },
+   "issue_time": "2024-05-01T00:09:20Z",
+   "mode":"forecast",
+"triggers": [{  "particle_intensity": { "observatory": "GOES-16",
+ "instrument": "SEISS",
+  "last_data_time": "2024-05-01T00:05:00Z"
+ } } ],
+ "forecasts": [ 
+   {"energy_channel": { "min": 10, "max": -1, "units": "MeV" },
+ "species": "proton",
+ "location": "earth",
+ "prediction_window": {
+  "start_time": "2024-05-01T00:05:16Z",
+ "end_time":"2024-05-01T02:05:16Z"},
+ "all_clear": { "threshold":10,
+ "threshold_units": "pfu",
+ "all_clear_boolean": true}
+    }
+ ]
+}}

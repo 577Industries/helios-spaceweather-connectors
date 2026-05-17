@@ -28,6 +28,7 @@ from .adapters.base import BaseAdapter
 from .adapters.donki import DonkiAdapter
 from .adapters.dscovr import DscovrAdapter
 from .adapters.goes import GoesAdapter
+from .adapters.sep_scoreboards import SepScoreboardsAdapter
 from .adapters.swpc import SwpcAdapter
 from .cache import CacheKey, FileCache, default_cache_root
 from .http import DEFAULT_USER_AGENT, make_client
@@ -48,6 +49,7 @@ __all__ = [
     "ProvenanceRecord",
     "RateLimitConfig",
     "RateLimiter",
+    "SepScoreboardsAdapter",
     "SourceID",
     "SwpcAdapter",
     "__version__",

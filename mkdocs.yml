@@ -97,3 +97,4 @@ nav:
   - Adapter pattern: design.md
   - Adapters:
       - DONKI: adapters/donki.md
+      - SEP Scoreboards: adapters/sep_scoreboards.md

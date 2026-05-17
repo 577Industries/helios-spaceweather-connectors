@@ -12,6 +12,14 @@ from .base import BaseAdapter
 from .donki import DonkiAdapter
 from .dscovr import DscovrAdapter
 from .goes import GoesAdapter
+from .sep_scoreboards import SepScoreboardsAdapter
 from .swpc import SwpcAdapter
 
-__all__ = ["BaseAdapter", "DonkiAdapter", "DscovrAdapter", "GoesAdapter", "SwpcAdapter"]
+__all__ = [
+    "BaseAdapter",
+    "DonkiAdapter",
+    "DscovrAdapter",
+    "GoesAdapter",
+    "SepScoreboardsAdapter",
+    "SwpcAdapter",
+]

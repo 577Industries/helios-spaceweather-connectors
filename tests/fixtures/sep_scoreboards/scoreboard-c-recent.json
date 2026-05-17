@@ -1,0 +1,135 @@
+{
+  "sep_forecast_submission": {
+    "model": {
+      "short_name": "UMASEP-10",
+      "spase_id": "spase://CCMC/SimulationModel/UMASEP/v3"
+    },
+    "issue_time": "2024-05-10T19:30:00Z",
+    "mode": "forecast",
+    "triggers": [
+      {
+        "cme": {
+          "start_time": "2024-05-08T16:00Z",
+          "lat": -22,
+          "lon": 65,
+          "speed": 794,
+          "half_width": 42,
+          "height": 21.5,
+          "coordinates": "HEEQ",
+          "catalog": "DONKI",
+          "catalog_id": "2024-05-08T16:00:00-CME-001"
+        }
+      },
+      {
+        "flare": {
+          "last_data_time": "2024-05-10T16:31Z",
+          "start_time": "2024-05-10T15:35Z",
+          "peak_time": "2024-05-10T16:06Z",
+          "end_time": "2024-05-10T16:31Z",
+          "location": "S08W88",
+          "intensity": "8.2e-4",
+          "noaa_region": 13664
+        }
+      }
+    ],
+    "forecasts": [
+      {
+        "energy_channel": { "min": 10, "max": -1, "units": "MeV" },
+        "species": "proton",
+        "location": "earth",
+        "prediction_window": {
+          "start_time": "2024-05-10T19:29:59Z",
+          "end_time": "2024-05-14T00:00:47Z"
+        },
+        "peak_intensity": {
+          "intensity": 3000.0,
+          "units": "pfu",
+          "time": "2024-05-10T23:00Z",
+          "uncertainty": 300.0
+        },
+        "event_lengths": [
+          {
+            "start_time": "2024-05-10T19:30Z",
+            "end_time": "2024-05-11T00:00Z",
+            "threshold_start": 1.0,
+            "threshold_end": 0.9,
+            "threshold_units": "pfu"
+          }
+        ],
+        "threshold_crossings": [
+          {
+            "crossing_time": "2024-05-10T19:30Z",
+            "uncertainty": 6.0,
+            "threshold": 10.0,
+            "threshold_units": "pfu"
+          },
+          {
+            "crossing_time": "2024-05-11T10:00Z",
+            "threshold": 100.0,
+            "threshold_units": "pfu"
+          }
+        ],
+        "probabilities": [
+          {
+            "probability_value": 0.85,
+            "uncertainty": 0.08,
+            "threshold": 10,
+            "threshold_units": "pfu"
+          },
+          {
+            "probability_value": 0.22,
+            "threshold": 100.0,
+            "threshold_units": "pfu"
+          }
+        ],
+        "all_clear": {
+          "all_clear_boolean": false,
+          "threshold": 10.0,
+          "threshold_units": "pfu",
+          "probability_threshold": 0.3
+        },
+        "sep_profile": "gannon.10MeV.txt",
+        "native_id": "20240510_1930_10MeV_umasep10"
+      },
+      {
+        "energy_channel": { "min": 100, "max": -1, "units": "MeV" },
+        "species": "proton",
+        "location": "earth",
+        "prediction_window": {
+          "start_time": "2024-05-10T19:30Z",
+          "end_time": "2024-05-10T22:30Z"
+        },
+        "event_lengths": [
+          {
+            "start_time": "2024-05-10T19:30Z",
+            "end_time": "2024-05-10T22:00Z",
+            "threshold_start": 0.2,
+            "threshold_end": 0.19,
+            "threshold_units": "pfu"
+          }
+        ],
+        "threshold_crossings": [
+          {
+            "crossing_time": "2024-05-10T19:30Z",
+            "threshold": 1.0,
+            "threshold_units": "pfu"
+          }
+        ],
+        "probabilities": [
+          {
+            "probability_value": 0.55,
+            "threshold": 1.0,
+            "threshold_units": "pfu"
+          }
+        ],
+        "all_clear": {
+          "all_clear_boolean": false,
+          "threshold": 1.0,
+          "threshold_units": "pfu"
+        },
+        "sep_profile": "gannon.100MeV.txt",
+        "native_id": "20240510_1930_100MeV_umasep10"
+      }
+    ]
+  }
+}
