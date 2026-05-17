@@ -346,17 +346,31 @@ class DscovrAdapter(BaseAdapter):
                 value[k] = _coerce_float(raw[k])
         dataset_ref = _dataset_ref_for(backend, "mag")
         record_id = f"dscovr-mag-{event_time.isoformat()}"
+        # Spec value is a scalar; Bz drives geomagnetic activity, so use
+        # it as the headline. Fall back to Bt magnitude if Bz is missing.
+        scalar: float | str
+        if bz is not None:
+            scalar = bz
+        elif bt is not None:
+            scalar = bt
+        else:
+            scalar = "compound"
         provenance = self._emit_provenance(
             model_id="dscovr/mag",
             dataset_refs=(dataset_ref,),
             timestamp=event_time,
-            value=value,
+            value=scalar,
             value_units="nT",
-            lineage=(dataset_ref,),
+            model_version=backend,
+            extra={
+                "frame": frame,
+                "payload": dict(value),
+                "lineage": [dataset_ref],
+            },
             record_id=record_id,
         )
         return NormalizedRecord(
-            source=SourceID.DSCOVR_MAG,
+            source=SourceID.DSCOVR,
             record_type="mag",
             event_time=event_time,
             value=value,
@@ -385,17 +399,28 @@ class DscovrAdapter(BaseAdapter):
                 value[k] = _coerce_float(raw[k])
         dataset_ref = _dataset_ref_for(backend, "plasma")
         record_id = f"dscovr-plasma-{event_time.isoformat()}"
+        # Speed is the canonical bulk-plasma indicator and the value
+        # fusion consumers key on; use it as the scalar, fall back to
+        # density, then to ``"compound"``.
+        scalar: float | str
+        if speed is not None:
+            scalar = speed
+        elif density is not None:
+            scalar = density
+        else:
+            scalar = "compound"
         provenance = self._emit_provenance(
             model_id="dscovr/plasma",
             dataset_refs=(dataset_ref,),
             timestamp=event_time,
-            value=value,
-            value_units="compound",
-            lineage=(dataset_ref,),
+            value=scalar,
+            value_units="km/s" if speed is not None else "compound",
+            model_version=backend,
+            extra={"payload": dict(value), "lineage": [dataset_ref]},
             record_id=record_id,
         )
         return NormalizedRecord(
-            source=SourceID.DSCOVR_PLASMA,
+            source=SourceID.DSCOVR,
             record_type="plasma",
             event_time=event_time,
             value=value,

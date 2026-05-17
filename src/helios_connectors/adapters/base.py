@@ -29,19 +29,29 @@ import asyncio
 import logging
 from abc import ABC, abstractmethod
 from collections.abc import AsyncIterator, Iterable
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Any, ClassVar
+from uuid import uuid4
 
 import httpx
+from helios_provenance.models import Agent, HeliosModelOutputRecord
 
 from ..cache import FileCache
 from ..http import make_client
 from ..ratelimit import RateLimitConfig, RateLimiter
-from ..schema import NormalizedRecord, ProvenanceRecord, SourceID
+from ..schema import NormalizedRecord, SourceID
 
 __all__ = ["BaseAdapter"]
 
 logger = logging.getLogger(__name__)
+
+
+def _ensure_utc(ts: datetime) -> datetime:
+    """Return a UTC-aware datetime; naive values are assumed UTC."""
+
+    if ts.tzinfo is None:
+        return ts.replace(tzinfo=UTC)
+    return ts.astimezone(UTC)
 
 
 class BaseAdapter(ABC):
@@ -190,31 +200,93 @@ class BaseAdapter(ABC):
     # provenance helper
     # ------------------------------------------------------------------ #
 
+    #: Override per-subclass to pin the upstream model/API version that
+    #: produced a record (e.g. ``"v1"`` for DONKI, ``"realtime"`` for SWPC
+    #: real-time JSON, ``"kyoto_wdc_final"`` when archive-routed). When an
+    #: adapter routes between products at different versions, pass the
+    #: ``model_version`` kwarg to :meth:`_emit_provenance` instead.
+    model_version: ClassVar[str] = "v1"
+
     def _emit_provenance(
         self,
         *,
         model_id: str,
         dataset_refs: Iterable[str],
         timestamp: datetime,
-        value: Any,
+        value: float | int | str | bool,
         value_units: str,
-        lineage: Iterable[str] = (),
+        model_version: str | None = None,
+        extra: dict[str, Any] | None = None,
         record_id: str | None = None,
-    ) -> ProvenanceRecord:
-        """Build a :class:`ProvenanceRecord` for a normalized value.
+    ) -> HeliosModelOutputRecord:
+        """Build a :class:`HeliosModelOutputRecord` for a normalized value.
 
-        Centralized so subclasses can't drift on UTC normalization,
-        UUID generation, or schema-version tagging. Keep the interface
-        narrow: anything an adapter doesn't pass through here doesn't
-        end up in the provenance, full stop.
+        Centralized so subclasses can't drift on UTC normalization, UUID
+        generation, agent attribution, or schema-version tagging. Keep
+        the interface narrow: anything an adapter doesn't pass through
+        here doesn't end up in the provenance, full stop.
+
+        Args:
+            model_id: scoped identifier for the upstream model/product
+                (e.g. ``"donki/CME"``, ``"swpc/kp"``, ``"goes/xray"``).
+            dataset_refs: dataset URLs / identifiers contributing to this
+                record. Must be non-empty per the provenance spec; the
+                helper synthesizes a fallback (the adapter source name)
+                when the iterable is empty so adapters that don't have a
+                canonical URL still produce a spec-valid record.
+            timestamp: event time of the science observation in UTC.
+            value: the scalar value being recorded (float / int / str /
+                bool). Compound payloads must be flattened to a scalar by
+                the caller, with the full dict carried in ``extra``.
+            value_units: human-readable units for ``value``.
+            model_version: optional per-call override of :attr:`model_version`
+                (e.g. switch between ``"realtime"`` and ``"kyoto_wdc_final"``).
+            extra: optional dict of additional context. Lineage segments,
+                the full upstream payload, frame/band/threshold metadata,
+                etc. all live here. ``None`` and ``{}`` are equivalent.
+            record_id: optional stable record identifier; defaults to a
+                fresh UUID4.
         """
 
-        return ProvenanceRecord.new(
+        now = datetime.now(UTC)
+        refs = list(dataset_refs)
+        if not refs:
+            # Spec requires dataset_refs with min_length=1. When an adapter
+            # cannot supply a canonical URL (DONKI events with no published
+            # detail page yet, synthesised forecast envelopes, etc.) fall
+            # back to the source enum string so the record is still valid.
+            refs = [f"helios-connectors://{self.source_id.value}"]
+        return HeliosModelOutputRecord(
+            id=record_id or str(uuid4()),
+            created_at=now,
+            agent=self._helios_agent(),
             model_id=model_id,
-            dataset_refs=tuple(dataset_refs),
-            timestamp=timestamp,
+            model_version=model_version or self.model_version,
+            dataset_refs=refs,
+            timestamp=_ensure_utc(timestamp),
             value=value,
             value_units=value_units,
-            lineage=tuple(lineage),
-            record_id=record_id,
+            ingestion_timestamp=now,
+            extra=extra if extra else None,
         )
+
+    def _helios_agent(self) -> Agent:
+        """Build the :class:`Agent` attribution for this adapter.
+
+        Cached per-instance under ``_agent`` so the pydantic object is
+        only constructed once even on hot fetch loops.
+        """
+
+        cached: Agent | None = getattr(self, "_agent", None)
+        if cached is not None:
+            return cached
+        from .. import __version__
+
+        agent = Agent(
+            id=f"helios-spaceweather-connectors/{type(self).__name__}",
+            name=type(self).__name__,
+            type="software",
+            version=__version__,
+        )
+        self._agent = agent
+        return agent

@@ -34,8 +34,8 @@ DLAT = -2.5
 LON1 = -180.0
 LON2 = 180.0
 DLON = 5.0
-N_LAT = int(round(abs((LAT2 - LAT1) / DLAT))) + 1  # 71
-N_LON = int(round(abs((LON2 - LON1) / DLON))) + 1  # 73
+N_LAT = round(abs((LAT2 - LAT1) / DLAT)) + 1  # 71
+N_LON = round(abs((LON2 - LON1) / DLON)) + 1  # 73
 EXPONENT = -1  # values stored as TECU * 10
 N_MAPS = 13
 DATE = datetime(2024, 5, 10, 0, 0, 0, tzinfo=UTC)  # DOY 131
@@ -69,10 +69,7 @@ def _tec_at(lat: float, lon: float, hour_utc: float) -> float:
 
 def _fmt_epoch(t: datetime) -> str:
     # 6 right-justified 6-wide ints: YYYY MM DD HH MM SS
-    return (
-        f"{t.year:6d}{t.month:6d}{t.day:6d}"
-        f"{t.hour:6d}{t.minute:6d}{t.second:6d}"
-    )
+    return f"{t.year:6d}{t.month:6d}{t.day:6d}{t.hour:6d}{t.minute:6d}{t.second:6d}"
 
 
 def _write_label(body: str, label: str) -> str:
@@ -84,8 +81,14 @@ def _write_label(body: str, label: str) -> str:
 def build_ionex() -> str:
     lines: list[str] = []
     lines.append(_write_label(f"{'1.0':>8s}{'I':>12s}", "IONEX VERSION / TYPE"))
-    lines.append(_write_label("HELIOS Synthetic   v0.2  HELIOS-test  20240511 000000 UTC", "PGM / RUN BY / DATE"))
-    lines.append(_write_label("Synthetic Gannon-storm fixture for helios-connectors", "DESCRIPTION"))
+    lines.append(
+        _write_label(
+            "HELIOS Synthetic   v0.2  HELIOS-test  20240511 000000 UTC", "PGM / RUN BY / DATE"
+        )
+    )
+    lines.append(
+        _write_label("Synthetic Gannon-storm fixture for helios-connectors", "DESCRIPTION")
+    )
     lines.append(_write_label(_fmt_epoch(DATE), "EPOCH OF FIRST MAP"))
     last = DATE + timedelta(seconds=INTERVAL_SEC * (N_MAPS - 1))
     lines.append(_write_label(_fmt_epoch(last), "EPOCH OF LAST MAP"))
@@ -107,18 +110,16 @@ def build_ionex() -> str:
         for lat_idx in range(N_LAT):
             lat = LAT1 + lat_idx * DLAT
             # The body of the LAT/LON1/LON2/DLON/H line:
-            body = (
-                f"{lat:8.1f}{LON1:8.1f}{LON2:8.1f}{DLON:8.1f}{HEIGHT_KM:8.1f}"
-            )
+            body = f"{lat:8.1f}{LON1:8.1f}{LON2:8.1f}{DLON:8.1f}{HEIGHT_KM:8.1f}"
             lines.append(_write_label(body, "LAT/LON1/LON2/DLON/H"))
             # 73 integers, 16 per row, width 5.
             ints: list[int] = []
             for lon_idx in range(N_LON):
                 lon = LON1 + lon_idx * DLON
                 tec = _tec_at(lat, lon, epoch.hour + epoch.minute / 60.0)
-                ints.append(int(round(tec * 10**(-EXPONENT))))
+                ints.append(round(tec * 10 ** (-EXPONENT)))
             for chunk_start in range(0, N_LON, 16):
-                chunk = ints[chunk_start:chunk_start + 16]
+                chunk = ints[chunk_start : chunk_start + 16]
                 row = "".join(f"{v:5d}" for v in chunk)
                 lines.append(row)
         lines.append(_write_label(f"{map_idx + 1:6d}", "END OF TEC MAP"))

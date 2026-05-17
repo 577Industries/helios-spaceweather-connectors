@@ -34,9 +34,9 @@ from .adapters.swpc import SwpcAdapter
 from .cache import CacheKey, FileCache, default_cache_root
 from .http import DEFAULT_USER_AGENT, make_client
 from .ratelimit import RateLimitConfig, RateLimiter
-from .schema import NormalizedRecord, ProvenanceRecord, SourceID
+from .schema import HeliosModelOutputRecord, NormalizedRecord, SourceID
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 __all__ = [
     "DEFAULT_USER_AGENT",
@@ -47,8 +47,8 @@ __all__ = [
     "DscovrAdapter",
     "FileCache",
     "GoesAdapter",
+    "HeliosModelOutputRecord",
     "NormalizedRecord",
-    "ProvenanceRecord",
     "RateLimitConfig",
     "RateLimiter",
     "SepScoreboardsAdapter",

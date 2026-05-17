@@ -264,13 +264,14 @@ async def test_fetch_kp_realtime_normalizes(
         records = [r async for r in swpc.fetch_kp(start=start, end=end)]
     assert records, "expected non-empty Kp record stream"
     for rec in records:
-        assert rec.source == SourceID.SWPC_KP
+        assert rec.source == SourceID.SWPC
         assert rec.record_type == "kp"
         assert rec.event_time.tzinfo is not None
         assert "kp" in rec.value
         assert "g_scale" in rec.value
-        assert rec.provenance.model_id == "swpc/kp-3-hour"
-        assert rec.provenance.lineage == ("swpc/kp",)
+        assert rec.provenance.model_id == "swpc/kp"
+        assert rec.provenance.extra is not None
+        assert rec.provenance.extra["lineage"] == ["swpc/kp"]
 
 
 @pytest.mark.asyncio
@@ -337,10 +338,14 @@ async def test_fetch_kp_gannon_routes_to_archive(
     # Records returned must span Gannon week (~6 days * 8 bins + 1 = ~49).
     # End is 2024-05-14T00:00 so the 14th-day bins after midnight are excluded.
     assert len(records) >= 6 * 8
-    assert all(r.source == SourceID.SWPC_KP for r in records)
+    assert all(r.source == SourceID.SWPC for r in records)
     assert all(r.record_type == "kp" for r in records)
     # Lineage must record the GFZ archive provider.
-    assert all(any("GFZ" in segment for segment in r.provenance.lineage) for r in records)
+    assert all(
+        r.provenance.extra is not None
+        and any("GFZ" in segment for segment in r.provenance.extra["lineage"])
+        for r in records
+    )
     # Verify the G5 record is present and correctly labeled.
     g5 = [r for r in records if r.value["g_scale"] == "G5"]
     assert g5, "expected at least one G5 record during Gannon week"
@@ -365,8 +370,9 @@ async def test_fetch_kp_archive_lineage_includes_gfz(
         ]
     assert records
     for rec in records:
-        assert "GFZ Potsdam/Kp_ap_Ap_SN_F107_since_1932.txt" in rec.provenance.lineage
-        assert rec.provenance.dataset_refs == (GFZ_KP_ARCHIVE_URL,)
+        assert rec.provenance.extra is not None
+        assert "GFZ Potsdam/Kp_ap_Ap_SN_F107_since_1932.txt" in rec.provenance.extra["lineage"]
+        assert rec.provenance.dataset_refs == [GFZ_KP_ARCHIVE_URL]
 
 
 # ---------------------------------------------------------------------------- #
@@ -383,7 +389,11 @@ async def test_fetch_dst_gannon_via_kyoto(kyoto_dst_2405_fixture: str) -> None:
     assert records
     assert all(r.record_type == "dst" for r in records)
     assert all(r.value_units == "nT" for r in records)
-    assert all(any("Kyoto WDC" in segment for segment in r.provenance.lineage) for r in records)
+    assert all(
+        r.provenance.extra is not None
+        and any("Kyoto WDC" in segment for segment in r.provenance.extra["lineage"])
+        for r in records
+    )
     # Min Dst during Gannon should be at most -400 nT
     min_dst = min(r.value["dst"] for r in records)
     assert min_dst <= -400
@@ -432,7 +442,7 @@ async def test_fetch_plasma_columnar(
         ]
     assert records
     sample = records[0]
-    assert sample.source == SourceID.SWPC_PLASMA
+    assert sample.source == SourceID.SWPC
     assert sample.record_type == "plasma"
     # Expected float columns: density, speed, temperature
     assert "density" in sample.value
@@ -456,7 +466,8 @@ async def test_fetch_mag_columnar(swpc_mag_fixture: list[list[Any]]) -> None:
         ]
     assert records
     sample = records[0]
-    assert sample.source == SourceID.SWPC_MAG
+    assert sample.source == SourceID.SWPC
+    assert sample.record_type == "mag"
     assert sample.value_units == "nT"
     assert "bz_gsm" in sample.value
     assert "bt" in sample.value
@@ -500,7 +511,8 @@ async def test_fetch_goes_protons_listdict(
         ]
     assert records
     sample = records[0]
-    assert sample.source == SourceID.GOES_PROTON
+    assert sample.source == SourceID.SWPC
+    assert sample.record_type == "proton"
     assert sample.value_units == "pfu"
     assert "flux" in sample.value
 
@@ -512,11 +524,12 @@ async def test_fetch_sep_forecast(swpc_sep_forecast_fixture: str) -> None:
         records = [r async for r in swpc.fetch_sep_forecast()]
     assert len(records) == 1
     rec = records[0]
-    assert rec.source == SourceID.SWPC_SEP_FORECAST
+    assert rec.source == SourceID.SWPC
+    assert rec.record_type == "sep_forecast"
     assert rec.value_units == "percent"
     assert rec.value["radiation_storm_probability"]
     assert rec.event_time.tzinfo is not None
-    assert rec.provenance.model_id == "swpc/sep-3-day-forecast"
+    assert rec.provenance.model_id == "swpc/sep_forecast"
 
 
 # ---------------------------------------------------------------------------- #
@@ -560,7 +573,7 @@ async def test_unified_fetch_dispatches_across_products(
     # entries may be outside the window; that's fine, just need ≥1).
     assert "plasma" in types
     assert "mag" in types
-    assert "goes_protons" in types
+    assert "proton" in types
     assert "sep_forecast" in types
 
 

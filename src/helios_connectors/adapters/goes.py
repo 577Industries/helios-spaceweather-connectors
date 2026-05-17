@@ -377,13 +377,20 @@ class GoesAdapter(BaseAdapter):
         if "threshold_mev" in sample:
             value["threshold_mev"] = sample["threshold_mev"]
         dataset_url = _ncei_archive_url(satellite, product)
+        scalar = _coerce_scalar_flux(value.get("flux"))
         provenance = self._emit_provenance(
-            model_id=f"goes/{product}/ncei-archive",
+            model_id=f"goes/{product}",
             dataset_refs=(dataset_url,),
             timestamp=event_time,
-            value=value,
+            value=scalar if scalar is not None else 0.0,
             value_units=units,
-            lineage=(dataset_url,),
+            model_version="ncei_archive",
+            extra={
+                "satellite": satellite,
+                "band": value.get("band"),
+                "threshold_mev": value.get("threshold_mev"),
+                "lineage": [dataset_url],
+            },
             record_id=_synthesise_record_id(satellite, product, band_or_threshold, event_time),
         )
         return NormalizedRecord(
@@ -481,13 +488,20 @@ class GoesAdapter(BaseAdapter):
             raise ValueError(f"unknown product: {product!r}")
 
         full_url = f"{SWPC_BASE_URL}{source_url}"
+        scalar = _coerce_scalar_flux(flux)
         provenance = self._emit_provenance(
-            model_id=f"goes/{product}/swpc-nrt",
+            model_id=f"goes/{product}",
             dataset_refs=(full_url,),
             timestamp=event_time,
-            value=value,
+            value=scalar if scalar is not None else 0.0,
             value_units=units,
-            lineage=(full_url,),
+            model_version="swpc_nrt",
+            extra={
+                "satellite": satellite,
+                "band": value.get("band"),
+                "threshold_mev": value.get("threshold_mev"),
+                "lineage": [full_url],
+            },
             record_id=_synthesise_record_id(satellite, product, band_or_threshold, event_time),
         )
         return NormalizedRecord(
@@ -499,67 +513,6 @@ class GoesAdapter(BaseAdapter):
             provenance=provenance,
             raw=item,
         )
-
-    # ------------------------------------------------------------------ #
-    # provenance-spec bridge
-    # ------------------------------------------------------------------ #
-
-    @staticmethod
-    def to_helios_model_output(record: NormalizedRecord) -> dict[str, Any]:
-        """Convert a :class:`NormalizedRecord` to a HELIOS provenance-spec
-        :class:`helios_provenance.models.HeliosModelOutputRecord` payload.
-
-        The spec requires the ``value`` field to be a primitive
-        (float/int/str/bool); the GOES adapter's ``value`` is a dict with
-        satellite/band metadata so the conversion flattens to:
-
-        * ``value`` ← ``record.value["flux"]`` (the scalar flux)
-        * ``extra`` ← the rest of the dict (satellite + band/threshold)
-
-        The returned object is a real ``HeliosModelOutputRecord`` validated
-        against the helios-provenance-spec v0.1 pydantic models.
-        """
-
-        # Import lazily so the helios_connectors top-level doesn't take a
-        # hard runtime dependency on the spec for downstream users who only
-        # consume the placeholder NormalizedRecord shape.
-        from helios_provenance.models import (
-            Agent,
-            HeliosModelOutputRecord,
-        )
-
-        flux = record.value.get("flux") if isinstance(record.value, dict) else None
-        extra: dict[str, Any] = {}
-        if isinstance(record.value, dict):
-            extra = {k: v for k, v in record.value.items() if k not in ("flux", "units")}
-
-        if not isinstance(flux, (int, float, str, bool)) or isinstance(flux, bool):
-            # Coerce; the spec needs a scalar. Use float when possible.
-            try:
-                flux = float(flux)  # type: ignore[arg-type]
-            except (TypeError, ValueError):
-                flux = str(flux)
-
-        agent = Agent(
-            id="helios-spaceweather-connectors/GoesAdapter",
-            name="GoesAdapter",
-            type="software",
-            version="0.2.0",
-        )
-        return HeliosModelOutputRecord(
-            id=record.provenance.id,
-            created_at=record.provenance.ingestion_timestamp,
-            agent=agent,
-            model_id=record.provenance.model_id,
-            model_version="0.2.0",
-            dataset_refs=list(record.provenance.dataset_refs)
-            or [_ncei_archive_url("GOES-16", "xray")],
-            timestamp=record.provenance.timestamp,
-            value=flux,
-            value_units=record.value_units,
-            ingestion_timestamp=record.provenance.ingestion_timestamp,
-            extra=extra or None,
-        ).model_dump(mode="json")
 
 
 # ---------------------------------------------------------------------------- #

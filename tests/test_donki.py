@@ -163,15 +163,20 @@ async def test_fetch_flr_lineage_present_when_linked(
     client = _mock_client({"FLR": donki_flr_fixture})
     async with DonkiAdapter(client=client, cache=False) as donki:
         records = [r async for r in donki.fetch_flr(start=GANNON_START, end=GANNON_END)]
+
     # All FLRs parse, none crash; some have lineage, others don't
-    with_lineage = [r for r in records if r.provenance.lineage]
-    without_lineage = [r for r in records if not r.provenance.lineage]
+    def _lineage(rec: object) -> list[str]:
+        extra = rec.provenance.extra  # type: ignore[attr-defined]
+        return extra.get("lineage", []) if extra else []
+
+    with_lineage = [r for r in records if _lineage(r)]
+    without_lineage = [r for r in records if not _lineage(r)]
     assert len(records) == len(donki_flr_fixture)
     assert with_lineage, "expected at least one FLR with linked CME/SEP in Gannon window"
     assert without_lineage, "expected at least one FLR without linkedEvents"
     # Linked FLRs should point at downstream CMEs / SEPs
     for rec in with_lineage:
-        kinds_linked = {item.split("-")[-2] for item in rec.provenance.lineage}
+        kinds_linked = {item.split("-")[-2] for item in _lineage(rec)}
         assert kinds_linked & {"CME", "SEP", "IPS"}, kinds_linked
 
 
@@ -188,10 +193,12 @@ async def test_fetch_gst_gannon_lineage(donki_gst_fixture: list[dict[str, Any]])
     async with DonkiAdapter(client=client, cache=False) as donki:
         records = [r async for r in donki.fetch_gst(start=GANNON_START, end=GANNON_END)]
     gannon_rec = next(r for r in records if r.provenance.id.startswith("2024-05-10"))
-    assert len(gannon_rec.provenance.lineage) >= 5
+    assert gannon_rec.provenance.extra is not None
+    lineage = gannon_rec.provenance.extra["lineage"]
+    assert len(lineage) >= 5
     # Verify the CMEs and IPS are both represented
-    assert any("CME" in linked for linked in gannon_rec.provenance.lineage)
-    assert any("IPS" in linked for linked in gannon_rec.provenance.lineage)
+    assert any("CME" in linked for linked in lineage)
+    assert any("IPS" in linked for linked in lineage)
     # The record_id matches the GST activityID
     assert gannon_rec.provenance.id == "2024-05-10T15:00:00-GST-001"
 

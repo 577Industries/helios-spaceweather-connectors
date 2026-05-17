@@ -236,7 +236,8 @@ async def test_fetch_xray_nrt_path_normalizes(
     assert all(r.value_units == "W/m^2" for r in records)
     # Lineage cites SWPC, not NCEI
     for rec in records:
-        assert any("services.swpc.noaa.gov" in step for step in rec.provenance.lineage)
+        assert rec.provenance.extra is not None
+        assert any("services.swpc.noaa.gov" in step for step in rec.provenance.extra["lineage"])
 
 
 @pytest.mark.asyncio
@@ -358,11 +359,12 @@ async def test_fetch_protons_gannon_routes_to_pyspedas(
     assert all(r.value_units == "pfu" for r in records)
     for rec in records:
         # Lineage must cite NCEI archive, NOT SWPC
-        lineage_str = " ".join(rec.provenance.lineage)
+        assert rec.provenance.extra is not None
+        lineage_str = " ".join(rec.provenance.extra["lineage"])
         assert "ncei.noaa.gov" in lineage_str
         assert "services.swpc.noaa.gov" not in lineage_str
-        # Model id reflects the archive path
-        assert "ncei-archive" in rec.provenance.model_id
+        # model_version reflects the archive path
+        assert rec.provenance.model_version == "ncei_archive"
     # Spot-check threshold metadata
     thresholds = {r.value["threshold_mev"] for r in records}
     assert thresholds == {10, 50, 100}
@@ -438,25 +440,26 @@ async def test_fetch_rejects_unknown_product() -> None:
 
 
 # ---------------------------------------------------------------------------- #
-# Provenance spec bridge
+# Provenance spec compliance — records ARE HeliosModelOutputRecord
 # ---------------------------------------------------------------------------- #
 
 
 @pytest.mark.asyncio
-async def test_to_helios_model_output_emits_spec_compliant_dict(
+async def test_record_provenance_is_spec_compliant(
     pyspedas_protons_fixture: list[dict[str, Any]],
 ) -> None:
-    """Convert a NormalizedRecord to a HeliosModelOutputRecord and validate it."""
+    """The provenance object IS a HeliosModelOutputRecord (no bridge needed)."""
     loader = _make_pyspedas_mock(pyspedas_protons_fixture[:1])
     async with GoesAdapter(cache=False, pyspedas_loader=loader) as goes:
         records = [r async for r in goes.fetch_protons(start=GANNON_START, end=GANNON_END)]
-    payload = GoesAdapter.to_helios_model_output(records[0])
-    assert payload["record_type"] == "HeliosModelOutputRecord"
-    assert payload["schema_version"] == "0.1.0"
-    assert isinstance(payload["value"], float)
-    assert payload["value_units"] == "pfu"
-    assert payload["extra"]["threshold_mev"] == 10
-    assert payload["extra"]["satellite"] == "GOES-16"
+    prov = records[0].provenance
+    assert prov.record_type == "HeliosModelOutputRecord"
+    assert prov.schema_version == "0.1.0"
+    assert isinstance(prov.value, float)
+    assert prov.value_units == "pfu"
+    assert prov.extra is not None
+    assert prov.extra["threshold_mev"] == 10
+    assert prov.extra["satellite"] == "GOES-16"
 
 
 # ---------------------------------------------------------------------------- #

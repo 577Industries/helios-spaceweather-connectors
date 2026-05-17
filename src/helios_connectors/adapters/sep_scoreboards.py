@@ -856,13 +856,16 @@ def _scoreboard_a_record(
         "all_thresholds": rows,
     }
     lineage = _lineage_for(fc.envelope, source_url)
+    scalar_prob = (
+        float(primary["probability"]) if isinstance(primary["probability"], (int, float)) else 0.0
+    )
     provenance = adapter._emit_provenance(
-        model_id=f"ccmc/sep_scoreboard_a/{_model_short_name(fc.envelope)}",
+        model_id=f"sep_scoreboard_a/{_model_short_name(fc.envelope)}",
         dataset_refs=(source_url,),
         timestamp=issue_time,
-        value=value,
+        value=scalar_prob,
         value_units="probability",
-        lineage=lineage,
+        extra={"payload": dict(value), "lineage": list(lineage)},
         record_id=_record_id(fc.envelope, "A", fc.energy_min),
     )
     return NormalizedRecord(
@@ -909,12 +912,12 @@ def _scoreboard_b_record(
     }
     lineage = _lineage_for(fc.envelope, source_url)
     provenance = adapter._emit_provenance(
-        model_id=f"ccmc/sep_scoreboard_b/{_model_short_name(fc.envelope)}",
+        model_id=f"sep_scoreboard_b/{_model_short_name(fc.envelope)}",
         dataset_refs=(source_url,),
         timestamp=peak_time or issue_time,
-        value=value,
+        value=intensity,
         value_units=units,
-        lineage=lineage,
+        extra={"payload": dict(value), "lineage": list(lineage)},
         record_id=_record_id(fc.envelope, "B", fc.energy_min),
     )
     return NormalizedRecord(
@@ -991,13 +994,20 @@ def _scoreboard_c_record(
         "sep_profile": sep_profile if isinstance(sep_profile, str) else None,
     }
     lineage = _lineage_for(fc.envelope, source_url)
+    # Scoreboard C records a single threshold-crossing event per record;
+    # the scalar value is a binary 1 (a crossing/onset was reported) or
+    # 0 (only an external SEP profile reference was found). Downstream
+    # consumers needing onset/crossing times read them from ``value`` on
+    # the NormalizedRecord (preserved) or from ``extra["payload"]`` on
+    # the provenance record.
+    crossing_count = 1 if (onset_time is not None or crossing_time is not None) else 0
     provenance = adapter._emit_provenance(
-        model_id=f"ccmc/sep_scoreboard_c/{_model_short_name(fc.envelope)}",
+        model_id=f"sep_scoreboard_c/{_model_short_name(fc.envelope)}",
         dataset_refs=(source_url,),
         timestamp=event_time,
-        value=value,
+        value=crossing_count,
         value_units=threshold_units,
-        lineage=lineage,
+        extra={"payload": dict(value), "lineage": list(lineage)},
         record_id=_record_id(fc.envelope, "C", fc.energy_min),
     )
     return NormalizedRecord(

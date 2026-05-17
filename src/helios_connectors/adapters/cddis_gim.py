@@ -626,13 +626,31 @@ class CddisGimAdapter(BaseAdapter):
             "center_name": center_name,
         }
         source_url = ionex.source_url or ""
+        # Spec requires a scalar; for tec_map records use the spatial-mean
+        # TEC and carry the full grid in extra. This mirrors the design
+        # call from the CDDIS review pack.
+        flat = [v for row in tec_grid_serialized for v in row if isinstance(v, (int, float))]
+        scalar_mean = (sum(flat) / len(flat)) if flat else 0.0
+        lineage = [center_name, source_url] if source_url else [center_name]
         provenance = self._emit_provenance(
             model_id=f"cddis/ionex/{center}",
             dataset_refs=(source_url,) if source_url else (),
             timestamp=ionex_map.epoch,
-            value=value,
+            value=scalar_mean,
             value_units="TECU",
-            lineage=(center_name, source_url) if source_url else (center_name,),
+            extra={
+                "tec_grid": tec_grid_serialized,
+                "tec_grid_shape": [
+                    len(tec_grid_serialized),
+                    len(tec_grid_serialized[0]) if tec_grid_serialized else 0,
+                ],
+                "lat_axis": list(ionex.lat_axis()),
+                "lon_axis": list(ionex.lon_axis()),
+                "height_km": ionex_map.height_km,
+                "center": center,
+                "center_name": center_name,
+                "lineage": lineage,
+            },
             record_id=f"cddis-{center}-{ionex_map.epoch.isoformat()}",
         )
         return NormalizedRecord(
@@ -665,13 +683,21 @@ class CddisGimAdapter(BaseAdapter):
             "center_name": center_name,
         }
         source_url = ionex.source_url or ""
+        lineage = [center_name, source_url] if source_url else [center_name]
         provenance = self._emit_provenance(
             model_id=f"cddis/ionex/{center}",
             dataset_refs=(source_url,) if source_url else (),
             timestamp=ionex_map.epoch,
-            value=value,
+            value=tec,
             value_units="TECU",
-            lineage=(center_name, source_url) if source_url else (center_name,),
+            extra={
+                "lat": lat,
+                "lon": lon,
+                "height_km": ionex_map.height_km,
+                "center": center,
+                "center_name": center_name,
+                "lineage": lineage,
+            },
             record_id=f"cddis-{center}-{lat:+.2f}-{lon:+.2f}-{ionex_map.epoch.isoformat()}",
         )
         return NormalizedRecord(
@@ -683,60 +709,6 @@ class CddisGimAdapter(BaseAdapter):
             provenance=provenance,
             raw={"source_url": source_url, "lat": lat, "lon": lon},
         )
-
-    # ------------------------------------------------------------------ #
-    # provenance-spec bridge (mirrors GoesAdapter pattern)
-    # ------------------------------------------------------------------ #
-
-    @staticmethod
-    def to_helios_model_output(record: NormalizedRecord) -> dict[str, Any]:
-        """Convert a :class:`NormalizedRecord` to a HELIOS provenance-spec
-        :class:`helios_provenance.models.HeliosModelOutputRecord` payload.
-
-        The provenance-spec value field requires a scalar. For
-        ``record_type="tec_point"`` records, ``value`` is the scalar TEC
-        and the rest of the value dict goes to ``extra``. For
-        ``record_type="tec_map"`` records, the grid itself is a 2-D
-        list — we coerce the *spatial mean* TEC into ``value`` and put
-        the full grid in ``extra``.
-        """
-
-        from helios_provenance.models import Agent, HeliosModelOutputRecord
-
-        value_dict = record.value if isinstance(record.value, dict) else {}
-        scalar: float | None
-        extra: dict[str, Any]
-        if record.record_type == "tec_point":
-            raw_tec = value_dict.get("tec")
-            scalar = float(raw_tec) if isinstance(raw_tec, (int, float)) else None
-            extra = {k: v for k, v in value_dict.items() if k != "tec"}
-        else:
-            grid = value_dict.get("tec_grid") or []
-            flat = [v for row in grid for v in row if isinstance(v, (int, float))]
-            scalar = (sum(flat) / len(flat)) if flat else None
-            extra = {k: v for k, v in value_dict.items() if k != "tec_grid"}
-            extra["tec_grid_shape"] = [len(grid), len(grid[0]) if grid else 0]
-
-        agent = Agent(
-            id="helios-spaceweather-connectors/CddisGimAdapter",
-            name="CddisGimAdapter",
-            type="software",
-            version="0.2.0",
-        )
-        payload: dict[str, Any] = HeliosModelOutputRecord(
-            id=record.provenance.id,
-            created_at=record.provenance.ingestion_timestamp,
-            agent=agent,
-            model_id=record.provenance.model_id,
-            model_version="0.2.0",
-            dataset_refs=list(record.provenance.dataset_refs) or [CDDIS_BASE_URL],
-            timestamp=record.provenance.timestamp,
-            value=scalar if scalar is not None else 0.0,
-            value_units=record.value_units,
-            ingestion_timestamp=record.provenance.ingestion_timestamp,
-            extra=extra or None,
-        ).model_dump(mode="json")
-        return payload
 
 
 # ---------------------------------------------------------------------------- #
