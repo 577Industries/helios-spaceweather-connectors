@@ -1,12 +1,18 @@
 name: CI
 
+# This workflow does not consume any untrusted GitHub event inputs
+# (issue titles, PR bodies, etc.) in `run:` steps. Secrets are exposed
+# only through `env:` blocks, never inline-interpolated into shell.
+
 on:
   push:
     branches: [main]
   pull_request:
     branches: [main]
   schedule:
-    - cron: '17 6 * * 1'  # weekly Monday 06:17 UTC
+    # Nightly at 06:17 UTC: runs the live-integration job (real DONKI calls).
+    - cron: '17 6 * * *'
+  workflow_dispatch:
 
 jobs:
   lint:
@@ -35,12 +41,33 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
       - run: pip install '.[dev]'
-      - run: pytest
+      # Unit-test pass: deselects @pytest.mark.live to keep PR signal
+      # independent of upstream NASA service availability.
+      - run: pytest -m "not live"
       - if: matrix.python-version == '3.12'
         uses: codecov/codecov-action@v4
         with:
           files: coverage.xml
           fail_ci_if_error: false
+
+  live-integration:
+    # Hits real upstream endpoints (DONKI). Runs nightly via schedule
+    # and on manual workflow_dispatch — never on PRs, so we never gate
+    # PR signal on a flaky NASA gateway.
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: pip install '.[dev]'
+      - env:
+          # NASA_API_KEY is optional — the live test defaults to the
+          # CCMC kauai endpoint which is unauthenticated.
+          NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
+        run: pytest -m live --no-cov
 
   security:
     runs-on: ubuntu-latest

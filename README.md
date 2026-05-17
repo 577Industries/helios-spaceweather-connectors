@@ -9,10 +9,19 @@
 
 This repository is part of the **HELIOS** program — a NASA SBIR Phase I effort by
 577 Industries Inc. supporting subtopic SPWX.1.S26A (Advanced Data-Driven
-Applications for Space Weather R2O2R). See proposal §2 Obj. 1 + §3 T1 of the proposal.
+Applications for Space Weather R2O2R). See proposal §2 Obj. 1 + §3 T1.
 
-**Initial scaffolding committed 2026-05-17. Implementation in progress.**
-Open issues to comment on the design or propose contributions.
+| Adapter | Strategy | Status |
+|---|---|---|
+| NASA DONKI | BUILD | **v0.1 — shipped** |
+| CCMC SEP Scoreboards A/B/C | BUILD | Planned (v0.2) |
+| NOAA SWPC | EXTEND | Planned (v0.2) |
+| NASA CDDIS GIMs | BUILD | Planned (v0.3) |
+| GOES X-ray + proton | WRAP | Planned (v0.3) |
+| DSCOVR | WRAP | Planned (v0.3) |
+
+See [`docs/index.md`](docs/index.md) for the full adapter survey and
+[`docs/design.md`](docs/design.md) for the framework conventions.
 
 ## Quickstart
 
@@ -21,9 +30,21 @@ pip install helios-spaceweather-connectors
 ```
 
 ```python
-import helios_connectors
-print(helios_connectors.__version__)
+from datetime import UTC, datetime
+
+from helios_connectors import DonkiAdapter
+
+async with DonkiAdapter() as donki:
+    async for rec in donki.fetch_gst(
+        start=datetime(2024, 5, 8, tzinfo=UTC),
+        end=datetime(2024, 5, 15, tzinfo=UTC),
+    ):
+        print(rec.event_time, rec.provenance.id, rec.provenance.lineage)
 ```
+
+The May 2024 Gannon G5 storm record carries an 8-deep lineage tracing
+back through its originating CMEs — see [`docs/adapters/donki.md`](docs/adapters/donki.md)
+and [`examples/donki_quickstart.ipynb`](examples/donki_quickstart.ipynb).
 
 ## Documentation
 
