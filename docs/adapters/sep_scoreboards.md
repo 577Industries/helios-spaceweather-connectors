@@ -207,3 +207,59 @@ absent keys as `None`.
 * `sep_json_writer.py` documentation:
   <https://ccmc.gsfc.nasa.gov/scoreboards/sep/using-json-helper-script-documentation/>
 * HELIOS proposal §3 T1 — CCMC integration constraints
+
+## Pre-2018 coverage (v0.2.1 ISWA probe)
+
+An exhaustive layout walk of every visible model directory under the
+ISWA scoreboard tree was conducted on 2026-05-17 (Sprint
+C-Training-v2). The full results live in
+[`helios-program/results/2026-05-17-iswa-coverage-matrix.md`](https://github.com/577Industries/helios-program/blob/main/results/2026-05-17-iswa-coverage-matrix.md).
+
+### Headline finding
+
+**ISWA's earliest deposit anywhere on the SEP scoreboard tree is
+calendar 2017.** No model directory contains any data older than 2017.
+Of the seven Table 3-1 training events, only **September 2017** has
+real ISWA coverage:
+
+| Model variant | Sept 2017 JSON count |
+|---|---|
+| `UMASEP/v2_0/{10,30,50,100}MeV` | 8,640 each |
+| `UMASEP/v2_0/500MeV` | 43,199 |
+| `SEPSTER/Parker` | 28 |
+| `SEPSTER/WSA-ENLIL` | 28 |
+| `mag4_2019/{HMI-NRT,V-HMI-NRT,VPLUS-HMI-NRT,VWF-HMI-NRT,WF-HMI-NRT}-JSON` | 658–708 each |
+| `NCAR_MLSO_KCOR` (coronagraph trigger, not SEP component) | 57 |
+
+All six other Table 3-1 events (Bastille 2000, Halloween 2003, Mid-23
+2005, Late-23 2006, Cycle 24-onset 2012, Cycle 24-mid 2012) are
+confirmed empty on ISWA. Training pipelines targeting those events
+must use an external ground-truth source (e.g.,
+[NOAA SWPC Solar Proton Events 1976-present](https://umbra.nascom.nasa.gov/SEP/seps.html))
+combined with synthetic-proxy streams for the per-model components.
+
+### What changed in v0.2.1's default registry
+
+- Added UMASEP variants `v2_0`, `v2_1`, `v20190101` (in addition to
+  existing `v3_X`)
+- Added SEPSTER `WSA-ENLIL` variant
+- Corrected SAWS_ASPECS variant chains to the actual layout
+  (`1.X/{Forecasts,Nowcasts}/{Intensity,Probability,Profile}`)
+- Added MagPy `2.X` + `3.X/LOS` (in addition to `3.X/VEC`)
+- Corrected SPRINTS-SEP chain to `1.X/Post_Eruptive`
+- Added newly-discovered models: `GSU_All_Clear`, `SEPForecast`,
+  `mag4_2019` (5 NRT variants)
+- Dropped SEPMOD — not visible on the ISWA tree at probe time;
+  callers can still inject it via the `models=` constructor kwarg
+- Energy-as-directory vs. energy-in-JSON: most models encode energy in
+  the JSON `energy_channel.units` field rather than a directory level.
+  `ScoreboardModelSpec.energies=("",)` signals "no energy dir between
+  variants and year"; see `listing_path` for URL construction.
+
+### What was *not* added
+
+- `iPATH/2.X`: directory exists but has zero year subdirectories.
+  Registry retains a nominal entry; listing walk will silently 404.
+- `NCAR_MLSO_KCOR`: a coronagraph/EUV product, not a SEP probability
+  or intensity forecast. Belongs to the upstream-cause trigger stream
+  (CME observation), not the per-model SEP prediction registry.
