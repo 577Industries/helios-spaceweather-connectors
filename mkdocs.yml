@@ -1,0 +1,44 @@
+site_name: helios-spaceweather-connectors
+site_description: "Production-grade Python adapters for six space-weather data sources (NASA DONKI, CCMC SEP Scoreboards A/B/C, NOAA SWPC, NASA CDDIS GIMs, GOES, DSCOVR), normalized to a common feature schema with feature-level provenance per helios-provenance-spec."
+site_url: "https://577-industries.github.io/helios-spaceweather-connectors/"
+repo_url: "https://github.com/577-Industries/helios-spaceweather-connectors"
+repo_name: 577-Industries/helios-spaceweather-connectors
+copyright: "Copyright 2026 577 Industries Inc."
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: deep purple
+      accent: amber
+    - scheme: slate
+      primary: deep purple
+      accent: amber
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            show_source: true
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md

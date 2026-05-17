@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software in academic work, please cite as below."
+title: "helios-spaceweather-connectors"
+abstract: "Production-grade Python adapters for six space-weather data sources (NASA DONKI, CCMC SEP Scoreboards A/B/C, NOAA SWPC, NASA CDDIS GIMs, GOES, DSCOVR), normalized to a common feature schema with feature-level provenance per helios-provenance-spec."
+authors:
+  - family-names: Waweru
+    given-names: Thomas
+    email: t.waweru@577industries.com
+    affiliation: 577 Industries Inc.
+keywords:
+  - heliophysics
+  - space weather
+  - machine learning
+  - provenance
+license: Apache-2.0
+repository-code: "https://github.com/577-Industries/helios-spaceweather-connectors"
+url: "https://github.com/577-Industries/helios-spaceweather-connectors"
+type: software
+version: 0.0.0
+date-released: "2026-05-17"
