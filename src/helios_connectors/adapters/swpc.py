@@ -171,31 +171,36 @@ provisional template is the only one that resolves.
 
 @dataclass(frozen=True, slots=True)
 class _Endpoint:
-    """Internal SWPC product descriptor."""
+    """Internal SWPC product descriptor.
+
+    ``record_type`` is the discriminator stored on each
+    :class:`NormalizedRecord` (e.g. ``"kp"``, ``"plasma"``, ``"mag"``,
+    ``"proton"``, ``"sep_forecast"``). All records emitted by this
+    adapter carry :attr:`SourceID.SWPC` as their source; per-product
+    routing is via ``record_type``.
+    """
 
     slug: str
     path: str
     model_id: str
-    source_id: SourceID
+    record_type: str
 
 
 _ENDPOINTS: dict[str, _Endpoint] = {
-    "kp": _Endpoint("kp", SWPC_PRODUCTS["kp"], "swpc/kp-3-hour", SourceID.SWPC_KP),
-    "plasma": _Endpoint(
-        "plasma", SWPC_PRODUCTS["plasma"], "swpc/plasma-1min", SourceID.SWPC_PLASMA
-    ),
-    "mag": _Endpoint("mag", SWPC_PRODUCTS["mag"], "swpc/mag-1min", SourceID.SWPC_MAG),
+    "kp": _Endpoint("kp", SWPC_PRODUCTS["kp"], "swpc/kp", "kp"),
+    "plasma": _Endpoint("plasma", SWPC_PRODUCTS["plasma"], "swpc/plasma", "plasma"),
+    "mag": _Endpoint("mag", SWPC_PRODUCTS["mag"], "swpc/mag", "mag"),
     "goes_protons": _Endpoint(
         "goes_protons",
         SWPC_PRODUCTS["goes_protons"],
-        "swpc/goes-protons-1min",
-        SourceID.GOES_PROTON,
+        "swpc/goes-protons",
+        "proton",
     ),
     "sep_forecast": _Endpoint(
         "sep_forecast",
         SWPC_PRODUCTS["sep_forecast"],
-        "swpc/sep-3-day-forecast",
-        SourceID.SWPC_SEP_FORECAST,
+        "swpc/sep_forecast",
+        "sep_forecast",
     ),
 }
 
@@ -237,7 +242,8 @@ class SwpcAdapter(BaseAdapter):
                 print(rec.event_time, rec.value["kp"], rec.provenance.lineage)
     """
 
-    source_id: ClassVar[SourceID] = SourceID.SWPC_KP
+    source_id: ClassVar[SourceID] = SourceID.SWPC
+    model_version: ClassVar[str] = "realtime"
 
     def __init__(
         self,
@@ -400,16 +406,20 @@ class SwpcAdapter(BaseAdapter):
         )
         text = response.text
         forecast = _parse_3_day_forecast(text)
+        scalar = _forecast_scalar(forecast)
         provenance = self._emit_provenance(
             model_id=_ENDPOINTS["sep_forecast"].model_id,
             dataset_refs=(self._base_url + _ENDPOINTS["sep_forecast"].path,),
             timestamp=forecast["issued"],
-            value=forecast,
+            value=scalar,
             value_units="percent",
-            lineage=(f"swpc/{_ENDPOINTS['sep_forecast'].slug}",),
+            extra={
+                "forecast": forecast,
+                "lineage": [f"swpc/{_ENDPOINTS['sep_forecast'].slug}"],
+            },
         )
         yield NormalizedRecord(
-            source=SourceID.SWPC_SEP_FORECAST,
+            source=SourceID.SWPC,
             record_type="sep_forecast",
             event_time=forecast["issued"],
             value=forecast,
@@ -515,10 +525,10 @@ class SwpcAdapter(BaseAdapter):
                 timestamp=ts,
                 value=kp_val,
                 value_units="none",
-                lineage=(f"swpc/{ep.slug}",),
+                extra={"payload": dict(value), "lineage": [f"swpc/{ep.slug}"]},
             )
             yield NormalizedRecord(
-                source=SourceID.SWPC_KP,
+                source=SourceID.SWPC,
                 record_type="kp",
                 event_time=ts,
                 value=value,
@@ -552,13 +562,17 @@ class SwpcAdapter(BaseAdapter):
                 timestamp=ts,
                 value=kp_val,
                 value_units="none",
-                lineage=(
-                    f"swpc/{ep.slug}",
-                    "GFZ Potsdam/Kp_ap_Ap_SN_F107_since_1932.txt",
-                ),
+                model_version="gfz_archive",
+                extra={
+                    "payload": dict(value),
+                    "lineage": [
+                        f"swpc/{ep.slug}",
+                        "GFZ Potsdam/Kp_ap_Ap_SN_F107_since_1932.txt",
+                    ],
+                },
             )
             yield NormalizedRecord(
-                source=SourceID.SWPC_KP,
+                source=SourceID.SWPC,
                 record_type="kp",
                 event_time=ts,
                 value=value,
@@ -627,21 +641,26 @@ class SwpcAdapter(BaseAdapter):
                     continue
                 value = {"dst": dst_val, "quality_tier": tier}
                 provenance = self._emit_provenance(
-                    model_id="swpc/dst-1-hour",
+                    model_id="swpc/dst",
                     dataset_refs=(chosen_url,),
                     timestamp=ts,
                     value=dst_val,
                     value_units="nT",
-                    lineage=(
-                        "swpc/dst",
-                        f"Kyoto WDC/{tier}/dst{yymm}",
-                    ),
+                    model_version=f"kyoto_wdc_{tier}",
+                    extra={
+                        "payload": dict(value),
+                        "lineage": [
+                            "swpc/dst",
+                            f"Kyoto WDC/{tier}/dst{yymm}",
+                        ],
+                    },
                 )
                 yield NormalizedRecord(
-                    # HELIOS treats Dst as part of the geomag-index suite; we
-                    # tag it SWPC_KP because there is no dedicated SWPC_DST
-                    # SourceID and Dst flows alongside Kp in the fusion layer.
-                    source=SourceID.SWPC_KP,
+                    # Dst is part of the geomag-index suite. The SWPC adapter
+                    # is the operational consumer; records carry SWPC source
+                    # and ``record_type="dst"`` as the per-product
+                    # discriminator.
+                    source=SourceID.SWPC,
                     record_type="dst",
                     event_time=ts,
                     value=value,
@@ -712,17 +731,18 @@ class SwpcAdapter(BaseAdapter):
                     value[col] = coerced if coerced is not None else raw_val
                 else:
                     value[col] = raw_val
+            scalar = _columnar_scalar(endpoint.record_type, value)
             provenance = self._emit_provenance(
                 model_id=endpoint.model_id,
                 dataset_refs=(self._base_url + endpoint.path,),
                 timestamp=ts,
-                value=value,
-                value_units=value_units,
-                lineage=(f"swpc/{endpoint.slug}",),
+                value=scalar,
+                value_units=_scalar_units(endpoint.record_type, value_units),
+                extra={"payload": dict(value), "lineage": [f"swpc/{endpoint.slug}"]},
             )
             yield NormalizedRecord(
-                source=endpoint.source_id,
-                record_type=endpoint.slug,
+                source=SourceID.SWPC,
+                record_type=endpoint.record_type,
                 event_time=ts,
                 value=value,
                 value_units=value_units,
@@ -763,17 +783,18 @@ class SwpcAdapter(BaseAdapter):
                 ts = ts.replace(tzinfo=UTC)
             if ts < start_utc or ts > end_utc:
                 continue
+            scalar = _listdict_scalar(endpoint.record_type, item)
             provenance = self._emit_provenance(
                 model_id=endpoint.model_id,
                 dataset_refs=(self._base_url + endpoint.path,),
                 timestamp=ts,
-                value=item,
+                value=scalar,
                 value_units=value_units,
-                lineage=(f"swpc/{endpoint.slug}",),
+                extra={"payload": dict(item), "lineage": [f"swpc/{endpoint.slug}"]},
             )
             yield NormalizedRecord(
-                source=endpoint.source_id,
-                record_type=endpoint.slug,
+                source=SourceID.SWPC,
+                record_type=endpoint.record_type,
                 event_time=ts,
                 value=dict(item),
                 value_units=value_units,
@@ -1052,6 +1073,74 @@ def _coerce_float(val: Any) -> float | None:
         except ValueError:
             return None
     return None
+
+
+# Map a record_type to the field in the payload that carries the
+# headline scalar value the provenance record records. Used by the
+# columnar (plasma/mag) and list-of-dict (proton) paths.
+_PRIMARY_SCALAR_FIELD: dict[str, tuple[str, ...]] = {
+    "plasma": ("speed", "density", "temperature"),
+    "mag": ("bz_gsm", "bz", "bt"),
+    "proton": ("flux",),
+}
+
+
+def _columnar_scalar(record_type: str, payload: dict[str, Any]) -> float | int | str | bool:
+    """Pick a scalar headline value from a columnar (plasma/mag) row.
+
+    Plasma rows carry density/speed/temperature; the operationally
+    relevant value is bulk speed. Mag rows carry Bx/By/Bz/Bt in GSM; Bz
+    is the canonical driver of geomagnetic activity and is the value
+    fusion consumers most often want. Falls back across the candidate
+    list before resorting to ``"compound"`` so the record always has a
+    spec-valid value.
+    """
+
+    for field in _PRIMARY_SCALAR_FIELD.get(record_type, ()):
+        val = payload.get(field)
+        if isinstance(val, (int, float)):
+            return val
+    return "compound"
+
+
+def _listdict_scalar(record_type: str, payload: dict[str, Any]) -> float | int | str | bool:
+    """Pick a scalar headline value from a list-of-dict (proton) entry."""
+    for field in _PRIMARY_SCALAR_FIELD.get(record_type, ()):
+        val = payload.get(field)
+        if isinstance(val, (int, float)):
+            return val
+    return "compound"
+
+
+def _scalar_units(record_type: str, fallback: str) -> str:
+    """Pick the units that match the scalar :func:`_columnar_scalar` picks."""
+    if record_type == "plasma":
+        return "km/s"
+    if record_type == "mag":
+        return "nT"
+    if record_type == "proton":
+        return "pfu"
+    return fallback
+
+
+def _forecast_scalar(forecast: dict[str, Any]) -> float | int | str | bool:
+    """Pick a single scalar from the SWPC 3-day forecast envelope.
+
+    SWPC publishes a multi-day, multi-product forecast; we surface the
+    Day-1 S-storm (radiation probability) value as the scalar because
+    that's the SEP all-clear driver the fusion layer hooks into. Falls
+    back to ``0.0`` if not present.
+    """
+
+    radiation = forecast.get("radiation_probability")
+    if isinstance(radiation, list) and radiation:
+        first = radiation[0]
+        if isinstance(first, dict):
+            for key in ("S1_or_greater", "probability", "value"):
+                val = first.get(key)
+                if isinstance(val, (int, float)):
+                    return float(val)
+    return 0.0
 
 
 def _g_scale_from_kp(kp: float) -> str:

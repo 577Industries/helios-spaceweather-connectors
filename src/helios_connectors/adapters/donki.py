@@ -345,20 +345,25 @@ class DonkiAdapter(BaseAdapter):
         activity_id = _coerce_activity_id(kind, raw)
         event_time = _coerce_event_time(kind, raw)
         lineage = _coerce_lineage(kind, raw)
+        scalar = _coerce_scalar(kind, raw, activity_id)
+        value: dict[str, Any] = {"record_type": kind, **raw}
+        extra: dict[str, Any] = {"payload": dict(raw)}
+        if lineage:
+            extra["lineage"] = list(lineage)
         provenance = self._emit_provenance(
             model_id=f"donki/{kind}",
             dataset_refs=(activity_id,) if activity_id else (),
             timestamp=event_time,
-            value=raw,
-            value_units="none",
-            lineage=lineage,
+            value=scalar,
+            value_units=_value_units_for(kind),
+            extra=extra,
             record_id=activity_id or None,
         )
         return NormalizedRecord(
             source=SourceID.DONKI,
             record_type=kind,
             event_time=event_time,
-            value=raw,
+            value=value,
             value_units="none",
             provenance=provenance,
             raw=raw,
@@ -418,6 +423,57 @@ def _coerce_event_time(kind: str, raw: dict[str, Any]) -> datetime:
             return ts.astimezone(UTC)
     logger.warning("DONKI/%s: no parseable timestamp in record; using now()", kind)
     return datetime.now(UTC)
+
+
+# Per-kind scalar pick: what's the headline value for this event class?
+_SCALAR_FIELDS: dict[str, tuple[str, ...]] = {
+    "CME": ("sourceLocation",),  # heliographic coords as string like "N12W34"
+    "CMEAnalysis": ("speed",),  # km/s
+    "FLR": ("classType",),  # "X1.2", "M5.6"
+    "SEP": ("instruments",),  # contributes via string fallback
+    "GST": ("kpIndex",),  # numeric Kp if reported
+    "IPS": ("location",),
+    "MPC": ("eventTime",),
+    "RBE": ("eventTime",),
+    "HSS": ("eventTime",),
+    "notifications": ("messageType",),
+}
+
+# Per-kind units for the scalar value.
+_SCALAR_UNITS: dict[str, str] = {
+    "CMEAnalysis": "km/s",
+    "GST": "none",  # Kp is dimensionless
+    "FLR": "GOES_class",
+}
+
+
+def _value_units_for(kind: str) -> str:
+    """Return the units string for a DONKI scalar value."""
+    return _SCALAR_UNITS.get(kind, "none")
+
+
+def _coerce_scalar(kind: str, raw: dict[str, Any], activity_id: str) -> float | int | str | bool:
+    """Pick a single scalar value for the provenance record.
+
+    DONKI events have rich JSON payloads — the placeholder schema kept
+    the whole dict. The HELIOS provenance spec requires a scalar; we
+    pick the most informative single field per event class (e.g. FLR
+    ``classType`` like ``"X1.2"``, CMEAnalysis ``speed`` km/s, GST
+    ``kpIndex``) and fall back to the activity identifier so the value
+    is always present and non-empty. The full payload lives in
+    ``extra["payload"]``.
+    """
+
+    fields = _SCALAR_FIELDS.get(kind, ())
+    for f in fields:
+        val = raw.get(f)
+        if isinstance(val, (int, float, bool)) and not isinstance(val, bool):
+            return val
+        if isinstance(val, bool):
+            return val
+        if isinstance(val, str) and val:
+            return val
+    return activity_id
 
 
 def _coerce_lineage(kind: str, raw: dict[str, Any]) -> tuple[str, ...]:
