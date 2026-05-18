@@ -673,6 +673,7 @@ def test_default_pyspedas_loader_dispatches_xray(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The default loader should route ``product='xray'`` to ``goes.xrs``."""
+    pytest.importorskip("pyspedas")  # WRAP-extras path; skip if not installed
     import helios_connectors.adapters.goes as goes_mod
 
     called: dict[str, Any] = {}
