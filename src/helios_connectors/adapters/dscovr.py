@@ -140,7 +140,7 @@ class DscovrAdapter(BaseAdapter):
         *,
         client: httpx.AsyncClient | None = None,
         rate_limit: RateLimitConfig | None = None,
-        cache: FileCache | None | bool = True,
+        cache: FileCache | bool | None = True,
         swpc_base_url: str = SWPC_BASE_URL,
         recent_threshold_hours: int = _DEFAULT_RECENT_THRESHOLD_HOURS,
     ) -> None:

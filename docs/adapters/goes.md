@@ -93,6 +93,7 @@ import asyncio
 from datetime import UTC, datetime
 from helios_connectors import GoesAdapter
 
+
 async def main() -> None:
     async with GoesAdapter() as goes:
         async for rec in goes.fetch_protons(
@@ -105,6 +106,7 @@ async def main() -> None:
                 rec.value["flux"],
                 rec.provenance.lineage[0],
             )
+
 
 asyncio.run(main())
 ```

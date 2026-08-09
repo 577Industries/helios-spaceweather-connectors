@@ -91,7 +91,8 @@ from helios_connectors import SwpcAdapter
 
 async with SwpcAdapter() as swpc:
     records = [
-        r async for r in swpc.fetch_kp(
+        r
+        async for r in swpc.fetch_kp(
             start=datetime(2024, 5, 8, tzinfo=UTC),
             end=datetime(2024, 5, 14, tzinfo=UTC),
         )
