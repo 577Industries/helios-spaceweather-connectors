@@ -46,13 +46,13 @@ Every adapter exposes:
 ```python
 @dataclass
 class NormalizedRecord:
-    source: SourceID            # which upstream system produced this
-    record_type: str            # source-local discriminator (e.g. "CME")
-    event_time: datetime        # UTC
-    value: dict[str, Any]       # JSON-serializable science payload
-    value_units: str            # e.g. "pfu", "nT", "none"
+    source: SourceID  # which upstream system produced this
+    record_type: str  # source-local discriminator (e.g. "CME")
+    event_time: datetime  # UTC
+    value: dict[str, Any]  # JSON-serializable science payload
+    value_units: str  # e.g. "pfu", "nT", "none"
     provenance: ProvenanceRecord
-    raw: dict[str, Any]         # the unmodified upstream response
+    raw: dict[str, Any]  # the unmodified upstream response
 ```
 
 Every adapter produces these. The shape is deliberately wider than any
@@ -64,15 +64,15 @@ structured (e.g. CME with linked flares) payloads in `value`.
 ```python
 @dataclass(frozen=True)
 class ProvenanceRecord:
-    id: str                  # globally unique
+    id: str  # globally unique
     schema_version: str
-    model_id: str            # e.g. "donki/CME", "swpc/kp-3-hour"
+    model_id: str  # e.g. "donki/CME", "swpc/kp-3-hour"
     dataset_refs: tuple[str, ...]
     timestamp: datetime
     value: Any
     value_units: str
     ingestion_timestamp: datetime  # when this adapter observed the upstream
-    lineage: tuple[str, ...] # upstream events / models contributing
+    lineage: tuple[str, ...]  # upstream events / models contributing
 ```
 
 For DONKI, `lineage` is populated from the `linkedEvents` array

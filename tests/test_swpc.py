@@ -27,7 +27,6 @@ from helios_connectors.adapters.swpc import (
     GFZ_KP_ARCHIVE_URL,
     SWPC_BASE_URL,
     SWPC_PRODUCTS,
-    SWPC_REALTIME_DAYS,
     _coerce_float,
     _g_scale_from_kp,
     _needs_archive,
@@ -193,6 +192,26 @@ def test_parse_3_day_forecast_missing_issued_returns_now() -> None:
 # ---------------------------------------------------------------------------- #
 
 
+def _pin_realtime_routing(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Force ``fetch_*`` onto the realtime branch regardless of fixture age.
+
+    ``_needs_archive`` compares ``start`` against ``now - SWPC_REALTIME_DAYS``
+    using the wall clock, so a test whose window spans recorded fixtures flips
+    to the GFZ archive branch once those fixtures are more than 30 days old.
+    That made the realtime tests time bombs: they passed when the fixtures were
+    captured and began failing roughly a month later, on unchanged code.
+
+    Pinning the branch here keeps these tests about realtime normalization and
+    filtering. Routing itself is covered separately and unmocked by
+    ``test_needs_archive_*``, ``test_fetch_kp_gannon_routes_to_archive`` and
+    ``test_fetch_kp_archive_lineage_includes_gfz``.
+    """
+    monkeypatch.setattr(
+        "helios_connectors.adapters.swpc._needs_archive",
+        lambda start: False,
+    )
+
+
 def _swpc_mock_client(
     responses: dict[str, Any],
     *,
@@ -245,20 +264,15 @@ def _archive_mock_client(
 @pytest.mark.asyncio
 async def test_fetch_kp_realtime_normalizes(
     swpc_kp_realtime_fixture: list[dict[str, Any]],
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Real-time Kp fetcher must normalize records with provenance + G-scale."""
-    # Derive the fixture's timestamp range and use a recent window that
-    # captures it. The fixture's earliest entry must be inside the SWPC
-    # real-time window (<30 days) for routing to stay on the realtime branch.
+    _pin_realtime_routing(monkeypatch)
+    # Window simply has to surround the fixture timestamps; routing is pinned
+    # above, so the fixture's age no longer decides which branch runs.
     fixture_ts = datetime.fromisoformat(swpc_kp_realtime_fixture[0]["time_tag"]).replace(tzinfo=UTC)
-    # Build a window that surrounds the fixture timestamps. The window
-    # start must be within the SWPC realtime window from "now" in real
-    # wall-clock time so the routing stays on realtime. We set start to
-    # the smaller of (now - 1 day, fixture_ts - 1 hour) — whichever keeps
-    # the routing branch on realtime AND captures the fixture.
-    now = datetime.now(UTC)
-    start = min(now - timedelta(days=1), fixture_ts - timedelta(hours=1))
-    end = max(now + timedelta(days=1), fixture_ts + timedelta(days=1))
+    start = fixture_ts - timedelta(hours=1)
+    end = fixture_ts + timedelta(days=1)
     client = _swpc_mock_client({SWPC_PRODUCTS["kp"]: swpc_kp_realtime_fixture})
     async with SwpcAdapter(client=client, cache=False) as swpc:
         records = [r async for r in swpc.fetch_kp(start=start, end=end)]
@@ -277,13 +291,15 @@ async def test_fetch_kp_realtime_normalizes(
 @pytest.mark.asyncio
 async def test_fetch_kp_realtime_filters_outside_window(
     swpc_kp_realtime_fixture: list[dict[str, Any]],
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """Records outside [start, end] must be filtered out.
 
-    We use a window that's recent enough to stay on the realtime branch
-    (and thus exercise the realtime filter code path) but that doesn't
-    overlap the fixture's actual timestamps.
+    Routing is pinned to the realtime branch so this exercises the realtime
+    filter; the window is offset from the fixture timestamps so nothing
+    should survive it.
     """
+    _pin_realtime_routing(monkeypatch)
     client = _swpc_mock_client({SWPC_PRODUCTS["kp"]: swpc_kp_realtime_fixture})
     fixture_ts = datetime.fromisoformat(swpc_kp_realtime_fixture[0]["time_tag"]).replace(tzinfo=UTC)
     # Window 5 days after the fixture, still well within 30 days of "now".
@@ -544,7 +560,9 @@ async def test_unified_fetch_dispatches_across_products(
     swpc_mag_fixture: list[list[Any]],
     swpc_protons_fixture: list[dict[str, Any]],
     swpc_sep_forecast_fixture: str,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
+    _pin_realtime_routing(monkeypatch)
     client = _swpc_mock_client(
         {
             SWPC_PRODUCTS["kp"]: swpc_kp_realtime_fixture,
@@ -554,11 +572,10 @@ async def test_unified_fetch_dispatches_across_products(
             SWPC_PRODUCTS["sep_forecast"]: swpc_sep_forecast_fixture,
         }
     )
-    now = datetime.now(UTC)
-    # Window covering both fixture timestamps and "now" while staying inside
-    # the SWPC real-time window (else routing flips to GFZ archive).
-    start = now - timedelta(days=SWPC_REALTIME_DAYS - 1)
-    end = now + timedelta(days=365)
+    # Routing is pinned above, so the window only has to span the fixtures.
+    fixture_ts = datetime.fromisoformat(swpc_kp_realtime_fixture[0]["time_tag"]).replace(tzinfo=UTC)
+    start = fixture_ts - timedelta(days=1)
+    end = datetime.now(UTC) + timedelta(days=365)
     async with SwpcAdapter(client=client, cache=False) as swpc:
         records = [
             r

@@ -150,7 +150,7 @@ class GoesAdapter(BaseAdapter):
         base_url: str = SWPC_BASE_URL,
         client: httpx.AsyncClient | None = None,
         rate_limit: RateLimitConfig | None = None,
-        cache: FileCache | None | bool = True,
+        cache: FileCache | bool | None = True,
         nrt_window_days: int = SWPC_NRT_WINDOW_DAYS,
         pyspedas_loader: Any | None = None,
     ) -> None:

@@ -272,7 +272,7 @@ class CddisGimAdapter(BaseAdapter):
         base_url: str = CDDIS_BASE_URL,
         client: httpx.AsyncClient | None = None,
         rate_limit: RateLimitConfig | None = None,
-        cache: FileCache | None | bool = True,
+        cache: FileCache | bool | None = True,
         cache_root: Path | None = None,
         username: str | None = None,
         password: str | None = None,

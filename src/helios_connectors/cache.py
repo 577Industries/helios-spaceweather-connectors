@@ -179,5 +179,5 @@ class FileCache:
 
         Mostly useful for debugging; returns row count + schema string.
         """
-        pf = pq.ParquetFile(path)  # type: ignore[no-untyped-call]
+        pf = pq.ParquetFile(path)
         return {"rows": pf.metadata.num_rows, "schema": str(pf.schema)}

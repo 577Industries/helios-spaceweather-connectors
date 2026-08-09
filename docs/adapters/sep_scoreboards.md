@@ -139,6 +139,7 @@ from datetime import datetime, timezone
 
 from helios_connectors import SepScoreboardsAdapter
 
+
 async def main() -> None:
     async with SepScoreboardsAdapter() as sb:
         async for rec in sb.fetch_scoreboard_a(
@@ -151,6 +152,7 @@ async def main() -> None:
                 f"P={rec.value['probability']:.2f}",
                 f"thr={rec.value['threshold']} {rec.value['threshold_units']}",
             )
+
 
 asyncio.run(main())
 ```

@@ -81,7 +81,7 @@ class BaseAdapter(ABC):
         *,
         client: httpx.AsyncClient | None = None,
         rate_limit: RateLimitConfig | None = None,
-        cache: FileCache | None | bool = True,
+        cache: FileCache | bool | None = True,
         base_url: str = "",
     ) -> None:
         """Construct an adapter.

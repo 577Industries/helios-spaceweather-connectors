@@ -253,7 +253,7 @@ class SwpcAdapter(BaseAdapter):
         client: httpx.AsyncClient | None = None,
         rate_limit: RateLimitConfig | None = None,
         archive_rate_limit: RateLimitConfig | None = None,
-        cache: FileCache | None | bool = True,
+        cache: FileCache | bool | None = True,
     ) -> None:
         """Construct a SWPC adapter.
 
