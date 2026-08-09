@@ -45,7 +45,7 @@ jobs:
       # independent of upstream NASA service availability.
       - run: pytest -m "not live"
       - if: matrix.python-version == '3.12'
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v7
         with:
           files: coverage.xml
           fail_ci_if_error: false
