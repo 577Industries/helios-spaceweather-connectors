@@ -56,6 +56,11 @@ jobs:
     # PR signal on a flaky NASA gateway.
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
+    # Cap the job: the runner default is 6 h, and the 2026-08-30 run burned
+    # 2 h 33 m crawling an active ISWA month. Per-test budgets live in
+    # pytest-timeout (--timeout below, plus @pytest.mark.timeout overrides);
+    # this is the hard backstop.
+    timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -67,7 +72,7 @@ jobs:
           # NASA_API_KEY is optional — the live test defaults to the
           # CCMC kauai endpoint which is unauthenticated.
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
-        run: pytest -m live --no-cov
+        run: pytest -m live --no-cov --timeout=300
 
   security:
     runs-on: ubuntu-latest

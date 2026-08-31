@@ -17,8 +17,8 @@ HELIOS' §2 Obj.2 fusion layer needs.
 | `kp`             | `/products/noaa-planetary-k-index.json`                           | 3-hour  | SWPC (real-time)             | `SWPC_KP`               |
 | `kp` (archive)   | `kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt`             | 3-hour  | GFZ Potsdam (since 1932)     | `SWPC_KP`               |
 | `dst`            | `wdc.kugi.kyoto-u.ac.jp/dst_{provisional,final}/<yyyymm>/...`     | 1-hour  | Kyoto WDC                    | `SWPC_KP` *(see below)* |
-| `plasma`         | `/products/solar-wind/plasma-7-day.json`                          | 1-min   | SWPC (DSCOVR-derived)        | `SWPC_PLASMA`           |
-| `mag`            | `/products/solar-wind/mag-7-day.json`                             | 1-min   | SWPC (DSCOVR-derived)        | `SWPC_MAG`              |
+| `plasma`         | `/json/rtsw/rtsw_wind_1m.json`                                    | 1-min   | SWPC RTSW (SOLAR1/IMAP/ACE, prime-selected) | `SWPC_PLASMA`           |
+| `mag`            | `/json/rtsw/rtsw_mag_1m.json`                                     | 1-min   | SWPC RTSW (SOLAR1/IMAP/ACE, prime-selected) | `SWPC_MAG`              |
 | `goes_protons`   | `/json/goes/primary/integral-protons-7-day.json`                  | 1-min   | SWPC (GOES-derived)          | `GOES_PROTON`           |
 | `sep_forecast`   | `/text/3-day-forecast.txt`                                        | daily   | SWPC (forecast text product) | `SWPC_SEP_FORECAST`     |
 
@@ -26,6 +26,25 @@ Dst is tagged with `SWPC_KP` (the closest existing SourceID; HELIOS
 treats Kp/Dst as a single geomag-index suite at the fusion layer).
 A dedicated `SWPC_DST` SourceID can be added in a follow-up PR if
 downstream consumers need to discriminate.
+
+### The 2026-08 RTSW migration (plasma/mag)
+
+NOAA retired the whole `/products/solar-wind/` product line in 2026-08 —
+every variant (7-day, 2-hour, 5-minute) now 404s. The RTSW successors
+(`/json/rtsw/`) differ in three ways the adapter absorbs:
+
+- **Shape**: list-of-dicts, newest-first, one record per (minute,
+  observatory) with the prime stream flagged `active: true`. The adapter
+  yields prime rows only, chronologically.
+- **Sources**: observatories are `SOLAR1` / `IMAP` / `ACE` — DSCOVR no
+  longer appears. Each record carries `value["observatory"]`.
+- **Depth**: ~24 h (was 7 days; `SWPC_SOLARWIND_HOURS`). Older windows
+  warn and route consumers to the DSCOVR adapter's archive path.
+
+Plasma field names map onto the long-standing keys: `proton_density` →
+`density`, `proton_speed` → `speed`, `proton_temperature` → `temperature`
+(alpha-particle fields ride along verbatim). Mag field names were carried
+over by NOAA unchanged.
 
 ## The 30-day archive limit (the gotcha)
 

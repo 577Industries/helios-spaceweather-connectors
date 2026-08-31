@@ -4,6 +4,36 @@ All notable changes to this project are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING / NOAA upstream migration (2026-08)**: NOAA SWPC retired the
+  entire `/products/solar-wind/` product line (every variant 404s). The
+  `plasma`/`mag` products of `SwpcAdapter` and the near-real-time leg of
+  `DscovrAdapter` now consume the RTSW successors
+  (`/json/rtsw/rtsw_wind_1m.json`, `/json/rtsw/rtsw_mag_1m.json`):
+  list-of-dicts, newest-first, ~24 h deep (was 7 days —
+  `SWPC_SOLARWIND_HOURS` documents the new depth), one record per
+  (minute, observatory) with the prime stream flagged `active`. Adapters
+  yield prime rows only, chronologically. Plasma `proton_*` fields map
+  onto the long-standing `density`/`speed`/`temperature` value keys; mag
+  field names were carried over by NOAA unchanged.
+- **BREAKING**: `DscovrAdapter`'s near-real-time records are tagged with
+  the new `SourceID.RTSW` instead of `SourceID.DSCOVR` — the feed's
+  observatories are now SOLAR1/IMAP/ACE, so the DSCOVR instrument claim
+  would be false. `SourceID.DSCOVR` remains on the PySPEDAS/NCEI archive
+  leg (genuinely DSCOVR L2 CDFs). Consumers filtering realtime records on
+  `SourceID.DSCOVR` must add `SourceID.RTSW`. Every RTSW-leg record (both
+  adapters) carries the observing spacecraft in `value["observatory"]`.
+
+### Fixed
+- `SepScoreboardsAdapter` provenance now cites full ISWA URLs: lineage and
+  `dataset_refs` previously carried client-relative paths (no host), which
+  went unnoticed while UMASEP had no recent issuances and surfaced as live
+  failures when 2026-08 activity produced records.
+- Live-integration CI is capped (`timeout-minutes: 45`, per-test
+  `pytest-timeout` budgets) and `test_live_iswa_recent` crawls 7 days
+  instead of 30 — the 30-day crawl of an active month ran 2.5 h at the
+  adapter's 3 RPS etiquette limit.
+
 ### Added
 - `CddisGimAdapter` — NASA CDDIS Global Ionosphere Maps (vertical TEC at
   2-hour cadence on 2.5-by-5 deg grid). BUILD strategy: no maintained Python

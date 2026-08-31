@@ -568,11 +568,16 @@ async def test_fetch_scoreboard_a_end_to_end(
     assert records, "expected at least one Scoreboard A record"
     assert all(r.source is SourceID.SEP_SCOREBOARD_A for r in records)
     assert all(r.record_type == "onset_probability" for r in records)
-    # Every record's lineage should reference the file URL we mocked
+    # Every record's lineage should reference the file URL we mocked —
+    # as a FULL URL (host included): fetching uses client-relative paths,
+    # but provenance must absolutize. This was a latent bug that only
+    # surfaced once UMASEP actually had recent issuances (2026-08).
     for rec in records:
         assert rec.provenance.extra is not None
         lineage = rec.provenance.extra["lineage"]
         assert any("UMASEP10_prediction" in step for step in lineage), lineage
+        assert any(ISWA_BASE_URL in step for step in lineage), lineage
+        assert any(ISWA_BASE_URL in ref for ref in rec.provenance.dataset_refs)
 
 
 @pytest.mark.asyncio
@@ -850,12 +855,20 @@ def test_default_rate_limit_is_3_rps() -> None:
 
 
 @pytest.mark.live
+@pytest.mark.timeout(900)
 @pytest.mark.asyncio
 async def test_live_iswa_recent() -> None:
-    """Hit live ISWA and pull whatever's in the most recent month for UMASEP."""
+    """Hit live ISWA and pull whatever's in the most recent week for UMASEP.
+
+    Window is 7 days (was 30): the adapter collects every envelope in the
+    window before yielding, at 3 RPS — an active month runs to hours (the
+    2026-08 nightly burned 2.5 h). A week keeps the live-drift signal while
+    fitting the job budget; the per-test timeout above is the crawl's
+    measured ceiling, not the suite default.
+    """
 
     now = datetime.now(UTC)
-    start = now - timedelta(days=30)
+    start = now - timedelta(days=7)
     async with SepScoreboardsAdapter(
         cache=False,
         models=(ScoreboardModelSpec(name="UMASEP", variants=("v3_X",), energies=("10MeV",)),),

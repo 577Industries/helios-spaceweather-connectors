@@ -595,7 +595,10 @@ class SepScoreboardsAdapter(BaseAdapter):
                 continue
             if env_result is None:
                 continue
-            out.append((url, env_result))
+            # Absolutize for provenance: ``url`` is the client-relative path
+            # used for fetching; lineage and dataset_refs must cite the full
+            # ISWA URL (host included), matching every other adapter.
+            out.append((self._base_url + url, env_result))
         return out
 
     async def _fetch_listing(self, path: str) -> tuple[list[str], list[str]]:

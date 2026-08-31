@@ -2,8 +2,12 @@
 
 Recorded fixtures live under ``tests/fixtures/dscovr/``:
 
-- ``plasma-7-day.json`` / ``mag-7-day.json`` — captured NOAA SWPC products
-  JSON for the near-real-time path.
+- ``rtsw_wind_1m.json`` / ``rtsw_mag_1m.json`` — captured NOAA SWPC RTSW
+  JSON (2026-08-31) for the near-real-time path: newest-first,
+  multi-observatory (SOLAR1/IMAP/ACE) with ``active`` prime flags.
+- ``plasma-7-day.json`` / ``mag-7-day.json`` — the retired columnar
+  products shape (Gannon-era capture), kept for the legacy branch of
+  ``_parse_swpc_csv_json``.
 - ``gannon-week-mag-tplot.json`` / ``gannon-week-plasma-tplot.json`` —
   synthetic recordings of the PySPEDAS ``get_data`` output shape for the
   May 2024 Gannon storm window. We mock pyspedas at the function boundary
@@ -58,13 +62,29 @@ _TplotData = namedtuple("_TplotData", ["times", "y"])
 
 
 @pytest.fixture(scope="session")
-def dscovr_plasma_swpc_fixture() -> list[list[Any]]:
-    return json.loads((FIXTURES_ROOT / "plasma-7-day.json").read_text())
+def dscovr_plasma_swpc_fixture() -> list[dict[str, Any]]:
+    """RTSW wind capture (2026-08-31, newest-first, multi-observatory).
+
+    The oldest active row's ``proton_density`` is nulled by hand so the
+    None-handling path stays covered.
+    """
+    return json.loads((FIXTURES_ROOT / "rtsw_wind_1m.json").read_text())
 
 
 @pytest.fixture(scope="session")
-def dscovr_mag_swpc_fixture() -> list[list[Any]]:
-    return json.loads((FIXTURES_ROOT / "mag-7-day.json").read_text())
+def dscovr_mag_swpc_fixture() -> list[dict[str, Any]]:
+    """RTSW mag capture (2026-08-31, newest-first, multi-observatory)."""
+    return json.loads((FIXTURES_ROOT / "rtsw_mag_1m.json").read_text())
+
+
+@pytest.fixture(scope="session")
+def dscovr_legacy_columnar_plasma() -> list[list[Any]]:
+    """Retired /products/solar-wind columnar capture (Gannon-era).
+
+    Kept to prove ``_parse_swpc_csv_json`` still converts the legacy
+    header-first array-of-arrays shape.
+    """
+    return json.loads((FIXTURES_ROOT / "plasma-7-day.json").read_text())
 
 
 @pytest.fixture(scope="session")
@@ -135,9 +155,9 @@ def test_coerce_timestamp_fallback_to_now(caplog: pytest.LogCaptureFixture) -> N
 
 
 def test_parse_swpc_csv_json_normal(
-    dscovr_plasma_swpc_fixture: list[list[Any]],
+    dscovr_legacy_columnar_plasma: list[list[Any]],
 ) -> None:
-    rows = _parse_swpc_csv_json(dscovr_plasma_swpc_fixture)
+    rows = _parse_swpc_csv_json(dscovr_legacy_columnar_plasma)
     assert len(rows) == 10
     assert rows[0]["time_tag"] == "2024-05-10 16:36:00.000"
     assert "density" in rows[0]
@@ -258,10 +278,10 @@ def test_tplot_to_plasma_rows_empty_when_no_np() -> None:
 
 def _mock_swpc_client(
     *,
-    plasma: list[list[Any]] | None = None,
-    mag: list[list[Any]] | None = None,
+    plasma: list[dict[str, Any]] | None = None,
+    mag: list[dict[str, Any]] | None = None,
 ) -> httpx.AsyncClient:
-    """Build an httpx AsyncClient that serves canned SWPC products payloads."""
+    """Build an httpx AsyncClient that serves canned SWPC RTSW payloads."""
 
     def handler(request: httpx.Request) -> httpx.Response:
         path = request.url.path
@@ -277,55 +297,65 @@ def _mock_swpc_client(
 
 @pytest.mark.asyncio
 async def test_swpc_path_explicit_backend(
-    dscovr_mag_swpc_fixture: list[list[Any]],
+    dscovr_mag_swpc_fixture: list[dict[str, Any]],
 ) -> None:
-    """Forcing backend='swpc' should hit the SWPC products endpoint."""
+    """Forcing backend='swpc' should hit the RTSW endpoint, prime rows only."""
     client = _mock_swpc_client(mag=dscovr_mag_swpc_fixture)
     async with DscovrAdapter(client=client, cache=False) as dscovr:
         records = [
             r
             async for r in dscovr.fetch_mag(
-                start=datetime(2024, 5, 10, 16, 0, tzinfo=UTC),
-                end=datetime(2024, 5, 10, 17, 0, tzinfo=UTC),
+                start=datetime(2026, 8, 31, 16, 0, tzinfo=UTC),
+                end=datetime(2026, 8, 31, 17, 0, tzinfo=UTC),
                 backend="swpc",
             )
         ]
-    assert len(records) == 10
-    assert all(r.source == SourceID.DSCOVR for r in records)
+    n_active = sum(1 for row in dscovr_mag_swpc_fixture if row.get("active"))
+    assert len(records) == n_active
+    # The near-real-time leg is RTSW-tagged post-2026-08; DSCOVR is the
+    # archive leg's identity only.
+    assert all(r.source == SourceID.RTSW for r in records)
     assert all(r.record_type == "mag" for r in records)
     # SWPC mag is published in GSM
     assert all(r.value["frame"] == "GSM" for r in records)
-    # bz from fixture row 0 should be -21.41 nT
-    assert records[0].value["bz"] == pytest.approx(-21.41)
+    assert all(r.value["observatory"] in {"SOLAR1", "IMAP", "ACE"} for r in records)
+    # Chronological despite the feed being newest-first; oldest active row
+    # in the 2026-08-31 capture is 16:07:00 with bz_gsm = -1.88 nT.
+    assert records[0].event_time == datetime(2026, 8, 31, 16, 7, 0, tzinfo=UTC)
+    assert records[0].value["bz"] == pytest.approx(-1.88)
 
 
 @pytest.mark.asyncio
 async def test_swpc_plasma_fetch_normalizes(
-    dscovr_plasma_swpc_fixture: list[list[Any]],
+    dscovr_plasma_swpc_fixture: list[dict[str, Any]],
 ) -> None:
     client = _mock_swpc_client(plasma=dscovr_plasma_swpc_fixture)
     async with DscovrAdapter(client=client, cache=False) as dscovr:
         records = [
             r
             async for r in dscovr.fetch_plasma(
-                start=datetime(2024, 5, 10, 16, 0, tzinfo=UTC),
-                end=datetime(2024, 5, 10, 17, 0, tzinfo=UTC),
+                start=datetime(2026, 8, 31, 16, 0, tzinfo=UTC),
+                end=datetime(2026, 8, 31, 17, 0, tzinfo=UTC),
                 backend="swpc",
             )
         ]
-    assert len(records) == 10
-    assert all(r.source == SourceID.DSCOVR for r in records)
-    assert records[0].value["density"] == pytest.approx(12.45)
-    assert records[0].value["speed"] == pytest.approx(615.3)
-    assert records[0].value["temperature"] == pytest.approx(342156.0)
-    # The -99999.9 sentinel row's density should be None, not the sentinel
-    sentinel_record = next(r for r in records if r.value["density"] is None)
-    assert sentinel_record is not None
+    n_active = sum(1 for row in dscovr_plasma_swpc_fixture if row.get("active"))
+    assert len(records) == n_active
+    assert all(r.source == SourceID.RTSW for r in records)
+    # RTSW proton_* keys must normalize onto density/speed/temperature.
+    # Oldest active capture row (16:03:00, the hand-nulled one): density
+    # None, speed 433.0 km/s, temperature 122388 K.
+    assert records[0].value["density"] is None
+    assert records[0].value["speed"] == pytest.approx(433.0)
+    assert records[0].value["temperature"] == pytest.approx(122388.0)
+    assert records[0].value["observatory"] == "SOLAR1"
+    # A null upstream field must surface as None, never a fill sentinel.
+    assert any(r.value["density"] is None for r in records)
 
 
 @pytest.mark.asyncio
 async def test_swpc_lineage_cites_services_swpc_noaa(
-    dscovr_mag_swpc_fixture: list[list[Any]],
+    dscovr_mag_swpc_fixture: list[dict[str, Any]],
 ) -> None:
     """SWPC-backed records must lineage-cite services.swpc.noaa.gov directly."""
     client = _mock_swpc_client(mag=dscovr_mag_swpc_fixture)
@@ -333,13 +363,16 @@ async def test_swpc_lineage_cites_services_swpc_noaa(
         records = [
             r
             async for r in dscovr.fetch_mag(
-                start=datetime(2024, 5, 10, 16, 0, tzinfo=UTC),
-                end=datetime(2024, 5, 10, 17, 0, tzinfo=UTC),
+                start=datetime(2026, 8, 31, 16, 0, tzinfo=UTC),
+                end=datetime(2026, 8, 31, 17, 0, tzinfo=UTC),
                 backend="swpc",
             )
         ]
+    assert records
     for rec in records:
         assert any("services.swpc.noaa.gov" in ref for ref in rec.provenance.dataset_refs)
+        # model_id names the adapter product line and is deliberately stable
+        # across the RTSW migration (the source tag is what changed).
         assert rec.provenance.model_id == "dscovr/mag"
 
 
@@ -495,8 +528,8 @@ async def test_auto_backend_selects_pyspedas_for_historical_window() -> None:
 
 @pytest.mark.asyncio
 async def test_unified_fetch_dispatches_both_products(
-    dscovr_plasma_swpc_fixture: list[list[Any]],
-    dscovr_mag_swpc_fixture: list[list[Any]],
+    dscovr_plasma_swpc_fixture: list[dict[str, Any]],
+    dscovr_mag_swpc_fixture: list[dict[str, Any]],
 ) -> None:
     """fetch(products=...) should call both endpoints when both requested."""
     client = _mock_swpc_client(
@@ -507,15 +540,15 @@ async def test_unified_fetch_dispatches_both_products(
         records = [
             r
             async for r in dscovr.fetch(
-                start=datetime(2024, 5, 10, 16, 0, tzinfo=UTC),
-                end=datetime(2024, 5, 10, 17, 0, tzinfo=UTC),
+                start=datetime(2026, 8, 31, 16, 0, tzinfo=UTC),
+                end=datetime(2026, 8, 31, 17, 0, tzinfo=UTC),
                 products=["mag", "plasma"],
                 backend="swpc",
             )
         ]
     sources = {r.source for r in records}
     record_types = {r.record_type for r in records}
-    assert sources == {SourceID.DSCOVR}
+    assert sources == {SourceID.RTSW}
     assert "mag" in record_types
     assert "plasma" in record_types
 
@@ -572,7 +605,7 @@ def test_intentional_overlap_with_swpc_documented() -> None:
 @pytest.mark.live
 @pytest.mark.asyncio
 async def test_live_swpc_last_six_hours() -> None:
-    """Hit the real SWPC near-real-time JSON for the last 6 h. Deselected by default."""
+    """Hit the real SWPC RTSW JSON for the last 6 h. Deselected by default."""
     end = datetime.now(UTC)
     start = end - timedelta(hours=6)
     async with DscovrAdapter(cache=False) as dscovr:
@@ -582,8 +615,8 @@ async def test_live_swpc_last_six_hours() -> None:
         ]
     assert len(mag_records) > 0, "expected some mag samples in the last 6 h"
     assert len(plasma_records) > 0, "expected some plasma samples in the last 6 h"
-    # Every record is DSCOVR-tagged, never SWPC-tagged
-    for rec in mag_records:
-        assert rec.source == SourceID.DSCOVR
-    for rec in plasma_records:
-        assert rec.source == SourceID.DSCOVR
+    # The near-real-time leg is RTSW-tagged (multi-observatory feed), and
+    # every record names its observing spacecraft.
+    for rec in mag_records + plasma_records:
+        assert rec.source == SourceID.RTSW
+        assert isinstance(rec.value.get("observatory"), str)
