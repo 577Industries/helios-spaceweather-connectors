@@ -919,7 +919,7 @@ def test_default_rate_limit_is_3_rps() -> None:
 
 
 @pytest.mark.live
-@pytest.mark.timeout(900)
+@pytest.mark.timeout(1800)
 @pytest.mark.asyncio
 async def test_live_iswa_recent() -> None:
     """Hit live ISWA and pull whatever's in the last 3 days for UMASEP.
@@ -928,9 +928,10 @@ async def test_live_iswa_recent() -> None:
     month (13k+ during 2026-08's activity) and fetching runs at 3 RPS, so
     the crawl cost scales with matched files — the filename prefilter
     (``_filename_maybe_in_window``) plus this window keeps an active-Sun
-    run in single-digit minutes where the unfiltered 30-day crawl burned
-    2.5 h in CI. The per-test timeout above is the measured ceiling with
-    margin, not the suite default.
+    run to minutes where the unfiltered 30-day crawl burned 2.5 h in CI.
+    The timeout above is 2.5x the measured active-period wall clock
+    (11 m 53 s on 2026-08-31, the tail of a very active month), not the
+    suite default; the job-level cap in ci.yml still bounds the whole run.
     """
 
     now = datetime.now(UTC)
