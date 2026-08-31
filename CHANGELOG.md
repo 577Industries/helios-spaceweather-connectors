@@ -29,10 +29,15 @@ All notable changes to this project are documented here, following [Keep a Chang
   `dataset_refs` previously carried client-relative paths (no host), which
   went unnoticed while UMASEP had no recent issuances and surfaced as live
   failures when 2026-08 activity produced records.
+- `SepScoreboardsAdapter` now prefilters listing filenames by their
+  embedded dates before downloading (fail-open for unrecognized names).
+  Month directories hold every file for the month (13k+ during 2026-08's
+  activity) and the issue-time filter only ran after download, so ANY
+  window touching an active month crawled the whole month at 3 RPS —
+  hours of runner time (the 08-30 nightly burned 2 h 33 m).
 - Live-integration CI is capped (`timeout-minutes: 45`, per-test
-  `pytest-timeout` budgets) and `test_live_iswa_recent` crawls 7 days
-  instead of 30 — the 30-day crawl of an active month ran 2.5 h at the
-  adapter's 3 RPS etiquette limit.
+  `pytest-timeout` budgets) and `test_live_iswa_recent` crawls 3 days
+  instead of 30.
 
 ### Added
 - `CddisGimAdapter` — NASA CDDIS Global Ionosphere Maps (vertical TEC at

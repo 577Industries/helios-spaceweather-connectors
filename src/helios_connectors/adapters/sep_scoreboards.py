@@ -81,7 +81,7 @@ import logging
 import re
 from collections.abc import AsyncIterator, Iterable, Sequence
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from typing import Any, ClassVar, Literal
 
 import httpx
@@ -316,6 +316,41 @@ def _parse_listing(html: str) -> tuple[list[str], list[str]]:
 # ---------------------------------------------------------------------------- #
 # Time helpers
 # ---------------------------------------------------------------------------- #
+
+
+_FNAME_DATE_RE = re.compile(r"(\d{4})[-_]?(\d{2})[-_]?(\d{2})")
+
+
+def _filename_maybe_in_window(fname: str, start: datetime, end: datetime) -> bool:
+    """Cheap pre-download filter on a scoreboard filename's embedded dates.
+
+    Scoreboard filenames embed issuance timestamps (UMASEP:
+    ``..._2026_08_01_000517__2026_08_01_000931.json``; SEPSTER:
+    ``..._20240501_0636_0794...``). A month directory holds every file for
+    that month — 13k+ in an active one — and the issue-time filter only
+    runs *after* download, so without this check a narrow window still
+    downloads the whole month at the 3 RPS etiquette limit (hours). Keep a
+    file if ANY date token lands in ``[start-1d, end+1d]`` (the pad
+    absorbs boundary/timezone skew); FAIL OPEN when nothing parses as a
+    plausible date, so an unknown naming scheme degrades to the old
+    fetch-everything behavior rather than silently dropping data.
+    """
+
+    lo = (_ensure_utc(start) - timedelta(days=1)).date()
+    hi = (_ensure_utc(end) + timedelta(days=1)).date()
+    saw_date = False
+    for m in _FNAME_DATE_RE.finditer(fname):
+        year, month, day = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        if not 1990 <= year <= 2100:
+            continue  # digit run that isn't a plausible date (model ids etc.)
+        try:
+            fd = date(year, month, day)
+        except ValueError:
+            continue
+        saw_date = True
+        if lo <= fd <= hi:
+            return True
+    return not saw_date
 
 
 def _ensure_utc(ts: datetime) -> datetime:
@@ -581,6 +616,8 @@ class SepScoreboardsAdapter(BaseAdapter):
             _subdirs, files = listing_result
             for fname in files:
                 if not fname.lower().endswith(".json"):
+                    continue
+                if not _filename_maybe_in_window(fname, start, end):
                     continue
                 file_urls.append((spec, f"{path}{fname}"))
 
