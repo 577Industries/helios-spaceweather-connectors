@@ -24,15 +24,20 @@ def swpc_kp_realtime_fixture() -> list[dict[str, object]]:
 
 
 @pytest.fixture(scope="session")
-def swpc_plasma_fixture() -> list[list[object]]:
-    """Real SWPC plasma-7-day response (header + ~1 hour of rows)."""
-    return json.loads((SWPC_FIXTURES_ROOT / "plasma-7-day.json").read_text())
+def swpc_plasma_fixture() -> list[dict[str, object]]:
+    """Real SWPC RTSW wind response (newest-first, ~20 min, multi-observatory).
+
+    Captured 2026-08-31 after NOAA retired /products/solar-wind. One active
+    (SOLAR1) row has ``proton_density`` nulled by hand so the None-handling
+    path stays covered (the live capture had no natural null that day).
+    """
+    return json.loads((SWPC_FIXTURES_ROOT / "rtsw_wind_1m.json").read_text())
 
 
 @pytest.fixture(scope="session")
-def swpc_mag_fixture() -> list[list[object]]:
-    """Real SWPC mag-7-day response (header + ~1 hour of rows)."""
-    return json.loads((SWPC_FIXTURES_ROOT / "mag-7-day.json").read_text())
+def swpc_mag_fixture() -> list[dict[str, object]]:
+    """Real SWPC RTSW mag response (newest-first, ~16 min, multi-observatory)."""
+    return json.loads((SWPC_FIXTURES_ROOT / "rtsw_mag_1m.json").read_text())
 
 
 @pytest.fixture(scope="session")

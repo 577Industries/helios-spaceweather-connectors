@@ -30,21 +30,41 @@ the requested time window:
   ``pyspedas.projects.dscovr.mag`` / ``.fc`` loaders, which fetch the
   authoritative Level-2 CDFs from the NOAA NCEI archive. Authoritative,
   re-calibrated, and includes ground-station quality flags.
-- *Near-real-time path* (last ~24-48 hours): NOAA SWPC's products JSON
-  endpoints. Lower latency, lower fidelity (no post-processing).
+- *Near-real-time path* (last ~24 hours): NOAA SWPC's RTSW JSON feed
+  (``/json/rtsw/``). Lower latency, lower fidelity (no post-processing).
+
+**The 2026-08 RTSW migration** — NOAA retired the DSCOVR-derived
+``/products/solar-wind/*-7-day.json`` product line. The successor RTSW feed
+is multi-observatory: each record names its ``source`` observatory
+(``SOLAR1`` / ``IMAP`` / ``ACE``; DSCOVR no longer appears) and flags the
+prime stream with ``active: true``. Consequences for this adapter's
+near-real-time leg:
+
+- Records are tagged ``source = SourceID.RTSW`` (the *service*), no longer
+  ``SourceID.DSCOVR`` — the instrument claim would be false. The observing
+  spacecraft is carried per-record in ``value["observatory"]``.
+- Only prime (``active``) rows are yielded, so the stream stays one record
+  per minute like the old product.
+- Depth is ~24 h (the old products carried 7 days). Windows starting
+  24-48 h ago therefore fall in a coverage gap on this leg — the NCEI
+  archive typically lags ~48 h; force ``backend="pyspedas"`` if partial
+  RTSW coverage is not acceptable for such windows.
 
 The crossover threshold is configurable via ``recent_threshold_hours`` (default
 48 h, matching the typical NCEI publishing lag).
 
 **Intentional overlap with ``SwpcAdapter``** — the SWPC adapter ALSO consumes
-the same NOAA SWPC near-real-time plasma/mag JSON. This is deliberate, paralleling
-the GOES/SWPC overlap:
+the same NOAA RTSW JSON. This is deliberate, paralleling the GOES/SWPC overlap:
 
-- ``SwpcAdapter`` records → ``source_id = SourceID.SWPC_*`` (operator-tagged).
-- ``DscovrAdapter`` records → ``source_id = SourceID.DSCOVR_*`` (instrument-tagged).
+- ``SwpcAdapter`` records → ``source_id = SourceID.SWPC`` (operator-tagged).
+- ``DscovrAdapter`` archive leg → ``source_id = SourceID.DSCOVR``
+  (instrument-tagged; genuinely DSCOVR L2 CDFs from NCEI).
+- ``DscovrAdapter`` near-real-time leg → ``source_id = SourceID.RTSW``
+  (service-tagged; per-record observatory in the payload).
 
-Downstream consumers that want "instrument-tagged" data prefer ``DscovrAdapter``;
-those that want "what the operator just published" prefer ``SwpcAdapter``.
+Downstream consumers that want instrument-tagged archive data prefer
+``DscovrAdapter``; those that want "what the operator just published" prefer
+``SwpcAdapter``.
 """
 
 from __future__ import annotations
@@ -77,11 +97,16 @@ logger = logging.getLogger(__name__)
 #: Base URL for NOAA SWPC near-real-time product feeds.
 SWPC_BASE_URL = "https://services.swpc.noaa.gov"
 
-#: SWPC products JSON path for the DSCOVR-derived 7-day plasma feed.
-SWPC_PLASMA_URL_PATH = "/products/solar-wind/plasma-7-day.json"
+#: SWPC RTSW JSON path for the near-real-time solar-wind plasma feed.
+#: NOAA retired the whole ``/products/solar-wind/`` product line in
+#: 2026-08 (``plasma-7-day.json`` et al. now 404); the successor is the
+#: RTSW list-of-dicts feed: ~24 h depth, newest-first, one record per
+#: (minute, observatory) with the prime observatory flagged ``active``.
+SWPC_PLASMA_URL_PATH = "/json/rtsw/rtsw_wind_1m.json"
 
-#: SWPC products JSON path for the DSCOVR-derived 7-day magnetometer feed.
-SWPC_MAG_URL_PATH = "/products/solar-wind/mag-7-day.json"
+#: SWPC RTSW JSON path for the near-real-time magnetometer feed.
+#: Same 2026-08 migration note as :data:`SWPC_PLASMA_URL_PATH`.
+SWPC_MAG_URL_PATH = "/json/rtsw/rtsw_mag_1m.json"
 
 #: Canonical product slugs this adapter knows about.
 DSCOVR_PRODUCTS: tuple[str, ...] = ("mag", "plasma")
@@ -235,9 +260,10 @@ class DscovrAdapter(BaseAdapter):
         Routing depends on ``backend`` (or the auto-rule when omitted):
 
         - ``pyspedas`` → :func:`pyspedas.projects.dscovr.mag` over NCEI archive;
-          emits GSE-frame samples at native ~1s cadence.
-        - ``swpc`` → SWPC ``mag-7-day.json``; emits GSM-frame samples at
-          1-minute cadence (the NOAA real-time aggregate).
+          emits GSE-frame samples at native ~1s cadence, ``SourceID.DSCOVR``.
+        - ``swpc`` → SWPC ``rtsw_mag_1m.json``; emits GSM-frame samples at
+          1-minute cadence from the prime observatory, ``SourceID.RTSW``
+          with ``value["observatory"]`` naming the spacecraft.
         """
 
         chosen = backend or self._choose_backend(start, end)
@@ -279,8 +305,11 @@ class DscovrAdapter(BaseAdapter):
         If ``start`` is within the recent-threshold window we route to SWPC;
         otherwise we route to the PySPEDAS NCEI-archive path. The decision
         is made on ``start`` (not ``end``) because PySPEDAS can serve up to
-        "yesterday" reliably and SWPC only goes back ~7 days — using start
-        keeps both backends within their published windows.
+        "yesterday" reliably while the RTSW feed only goes back ~24 h.
+        NOTE the post-2026-08 coverage gap: with the default 48 h threshold,
+        a window starting 24-48 h ago routes to RTSW but only its trailing
+        ~24 h exist — force ``backend="pyspedas"`` when that partiality is
+        unacceptable (accepting the NCEI publishing lag instead).
         """
 
         now = datetime.now(UTC)
@@ -304,7 +333,7 @@ class DscovrAdapter(BaseAdapter):
             safe_log_params=(),
         )
         payload = response.json()
-        rows = _parse_swpc_csv_json(payload)
+        rows = _select_rtsw_prime(_parse_swpc_csv_json(payload))
         return _filter_rows(rows, start=start, end=end, time_key="time_tag")
 
     async def _fetch_swpc_plasma(self, *, start: datetime, end: datetime) -> list[dict[str, Any]]:
@@ -317,7 +346,7 @@ class DscovrAdapter(BaseAdapter):
             safe_log_params=(),
         )
         payload = response.json()
-        rows = _parse_swpc_csv_json(payload)
+        rows = _select_rtsw_prime(_parse_swpc_csv_json(payload))
         return _filter_rows(rows, start=start, end=end, time_key="time_tag")
 
     # ------------------------------------------------------------------ #
@@ -340,8 +369,15 @@ class DscovrAdapter(BaseAdapter):
             "bt": bt,
             "frame": frame,
         }
-        # Carry through any extra coordinate readouts (lon/lat in GSM, etc.)
-        for k in ("lon_gsm", "lat_gsm", "bx_gse", "by_gse", "bz_gse"):
+        # RTSW rows name their observing spacecraft (SOLAR1/IMAP/ACE); keep
+        # the instrument identity on the record since the source tag is the
+        # service, not the spacecraft.
+        observatory = raw.get("source")
+        if backend == "swpc" and isinstance(observatory, str):
+            value["observatory"] = observatory
+        # Carry through any extra coordinate readouts (lon/lat or phi/theta
+        # angles in GSM, GSE components, etc.)
+        for k in ("lon_gsm", "lat_gsm", "phi_gsm", "theta_gsm", "bx_gse", "by_gse", "bz_gse"):
             if k in raw:
                 value[k] = _coerce_float(raw[k])
         dataset_ref = _dataset_ref_for(backend, "mag")
@@ -370,7 +406,9 @@ class DscovrAdapter(BaseAdapter):
             record_id=record_id,
         )
         return NormalizedRecord(
-            source=SourceID.DSCOVR,
+            # Post-2026-08 the near-real-time feed is multi-observatory RTSW
+            # (SOLAR1/IMAP/ACE) — only the NCEI archive leg is still DSCOVR.
+            source=SourceID.RTSW if backend == "swpc" else SourceID.DSCOVR,
             record_type="mag",
             event_time=event_time,
             value=value,
@@ -381,9 +419,16 @@ class DscovrAdapter(BaseAdapter):
 
     def _normalize_plasma(self, raw: dict[str, Any], *, backend: str) -> NormalizedRecord:
         event_time = _coerce_timestamp(raw)
-        density = _coerce_float(raw.get("density") or raw.get("Np"))
-        speed = _coerce_float(raw.get("speed") or raw.get("V") or raw.get("v"))
-        temperature = _coerce_float(raw.get("temperature") or raw.get("THERMAL_TEMP"))
+        # Key fallbacks span three upstream shapes: retired products JSON
+        # (density/speed/temperature), PySPEDAS tplot rows (Np/v/THERMAL_TEMP),
+        # and the 2026-08 RTSW feed (proton_*).
+        density = _coerce_float(raw.get("density") or raw.get("Np") or raw.get("proton_density"))
+        speed = _coerce_float(
+            raw.get("speed") or raw.get("V") or raw.get("v") or raw.get("proton_speed")
+        )
+        temperature = _coerce_float(
+            raw.get("temperature") or raw.get("THERMAL_TEMP") or raw.get("proton_temperature")
+        )
         value: dict[str, Any] = {
             "density": density,
             "speed": speed,
@@ -392,6 +437,9 @@ class DscovrAdapter(BaseAdapter):
             "speed_units": "km/s",
             "temperature_units": "K",
         }
+        observatory = raw.get("source")
+        if backend == "swpc" and isinstance(observatory, str):
+            value["observatory"] = observatory
         # Pass-through any GSE plasma-velocity components if PySPEDAS loaded
         # them so consumers can compute Vx/Vy/Vz alignment.
         for k in ("vx_gse", "vy_gse", "vz_gse"):
@@ -420,7 +468,8 @@ class DscovrAdapter(BaseAdapter):
             record_id=record_id,
         )
         return NormalizedRecord(
-            source=SourceID.DSCOVR,
+            # Same RTSW-vs-DSCOVR split as _normalize_mag.
+            source=SourceID.RTSW if backend == "swpc" else SourceID.DSCOVR,
             record_type="plasma",
             event_time=event_time,
             value=value,
@@ -531,6 +580,23 @@ def _parse_swpc_csv_json(payload: Any) -> list[dict[str, Any]]:
             continue
         rows.append(dict(zip(header, row, strict=True)))
     return rows
+
+
+def _select_rtsw_prime(rows: Sequence[dict[str, Any]]) -> list[dict[str, Any]]:
+    """Reduce an RTSW payload to the prime observatory's stream, oldest-first.
+
+    The RTSW feed publishes one record per (minute, observatory) — SOLAR1 /
+    IMAP / ACE side by side — newest-first, with the prime stream flagged
+    ``active: true``. Keeping only prime rows restores the one-record-per-
+    minute contract of the retired ``/products/solar-wind`` feeds. Rows
+    without an ``active`` key (legacy columnar captures, archive shapes)
+    pass through untouched so the old format keeps parsing.
+    """
+
+    selected = [r for r in rows if "active" not in r or r.get("active") is True]
+    # RTSW serves newest-first; sort back to chronological so consumers see
+    # the same ordering the retired products feed had.
+    return sorted(selected, key=lambda r: str(r.get("time_tag", "")))
 
 
 def _filter_rows(

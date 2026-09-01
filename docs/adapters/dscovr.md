@@ -25,15 +25,25 @@ The adapter picks a backend automatically based on the age of the requested
 window. The decision is made on `start` (not `end`) so both backends stay within
 their published time windows.
 
-| Start age vs now | Backend | Lineage URL |
-|---|---|---|
-| ≤ 48 h | NOAA SWPC products JSON (`services.swpc.noaa.gov/products/solar-wind/`) | `https://services.swpc.noaa.gov/products/solar-wind/{mag,plasma}-7-day.json` |
-| > 48 h | PySPEDAS `pyspedas.projects.dscovr.{mag,fc}` → NCEI archive | `https://www.ngdc.noaa.gov/dscovr/portal/` |
+| Start age vs now | Backend | SourceID | Lineage URL |
+|---|---|---|---|
+| ≤ 48 h | NOAA SWPC RTSW JSON (`services.swpc.noaa.gov/json/rtsw/`) | `RTSW` | `https://services.swpc.noaa.gov/json/rtsw/rtsw_{mag,wind}_1m.json` |
+| > 48 h | PySPEDAS `pyspedas.projects.dscovr.{mag,fc}` → NCEI archive | `DSCOVR` | `https://www.ngdc.noaa.gov/dscovr/portal/` |
 
 Override with `fetch_mag(..., backend="pyspedas")` or `backend="swpc"`.
 
-The 48-hour threshold matches NOAA's typical NCEI publishing lag and the 7-day
-SWPC near-real-time window. Tune via `DscovrAdapter(recent_threshold_hours=...)`.
+The 48-hour threshold matches NOAA's typical NCEI publishing lag. Tune via
+`DscovrAdapter(recent_threshold_hours=...)`.
+
+**The 2026-08 RTSW migration**: NOAA retired the DSCOVR-derived
+`/products/solar-wind/*-7-day.json` feeds. The RTSW successor is
+multi-observatory (`SOLAR1`/`IMAP`/`ACE`, prime rows flagged `active`) —
+so near-real-time records are now tagged `SourceID.RTSW` with the
+observing spacecraft in `value["observatory"]`; the DSCOVR instrument tag
+survives only on the archive leg, which really is DSCOVR L2 data. RTSW
+depth is ~24 h (the old feeds held 7 days), leaving a 24-48 h coverage
+gap on the near-real-time leg — force `backend="pyspedas"` when partial
+coverage there is unacceptable.
 
 ## L1 propagation lag
 

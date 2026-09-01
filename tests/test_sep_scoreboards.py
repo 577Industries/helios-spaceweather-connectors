@@ -37,6 +37,7 @@ from helios_connectors.adapters.sep_scoreboards import (
     _coerce_issue_time,
     _ensure_utc,
     _expand_forecasts,
+    _filename_maybe_in_window,
     _lineage_for,
     _maybe_float,
     _maybe_isoparse,
@@ -192,6 +193,48 @@ def test_model_short_name_and_spase(
 def test_model_short_name_unknown_when_missing() -> None:
     assert _model_short_name({}) == "unknown"
     assert _spase_id({}) is None
+
+
+def test_filename_prefilter_keeps_in_window_umasep_style() -> None:
+    start = datetime(2026, 8, 29, tzinfo=UTC)
+    end = datetime(2026, 8, 31, tzinfo=UTC)
+    fname = "UMASEP10_prediction_2026_08_30_000517__2026_08_30_000931.json"
+    assert _filename_maybe_in_window(fname, start, end)
+
+
+def test_filename_prefilter_drops_out_of_window() -> None:
+    start = datetime(2026, 8, 29, tzinfo=UTC)
+    end = datetime(2026, 8, 31, tzinfo=UTC)
+    fname = "UMASEP10_prediction_2026_08_01_000517__2026_08_01_000931.json"
+    assert not _filename_maybe_in_window(fname, start, end)
+
+
+def test_filename_prefilter_keeps_boundary_via_pad() -> None:
+    # end+1d pad: a file dated the day after the window still fetches.
+    start = datetime(2026, 8, 29, tzinfo=UTC)
+    end = datetime(2026, 8, 31, tzinfo=UTC)
+    fname = "UMASEP10_prediction_2026_09_01_000000__2026_09_01_000100.json"
+    assert _filename_maybe_in_window(fname, start, end)
+
+
+def test_filename_prefilter_compact_sepster_style() -> None:
+    start = datetime(2024, 5, 1, tzinfo=UTC)
+    end = datetime(2024, 5, 2, tzinfo=UTC)
+    assert _filename_maybe_in_window(
+        "sepster_20240501_0636_0794_Parker_Spiral_iss_20240501_1547.json", start, end
+    )
+    assert not _filename_maybe_in_window(
+        "sepster_20240401_0636_0794_Parker_Spiral_iss_20240401_1547.json", start, end
+    )
+
+
+def test_filename_prefilter_fails_open_without_dates() -> None:
+    start = datetime(2026, 8, 29, tzinfo=UTC)
+    end = datetime(2026, 8, 31, tzinfo=UTC)
+    # No parseable date tokens -> must fetch (fail-open), including digit
+    # runs that are not plausible dates.
+    assert _filename_maybe_in_window("model_output_final.json", start, end)
+    assert _filename_maybe_in_window("run_0774_9912_31.json", start, end)
 
 
 def test_lineage_includes_source_url_model_and_triggers(
@@ -568,11 +611,16 @@ async def test_fetch_scoreboard_a_end_to_end(
     assert records, "expected at least one Scoreboard A record"
     assert all(r.source is SourceID.SEP_SCOREBOARD_A for r in records)
     assert all(r.record_type == "onset_probability" for r in records)
-    # Every record's lineage should reference the file URL we mocked
+    # Every record's lineage should reference the file URL we mocked —
+    # as a FULL URL (host included): fetching uses client-relative paths,
+    # but provenance must absolutize. This was a latent bug that only
+    # surfaced once UMASEP actually had recent issuances (2026-08).
     for rec in records:
         assert rec.provenance.extra is not None
         lineage = rec.provenance.extra["lineage"]
         assert any("UMASEP10_prediction" in step for step in lineage), lineage
+        assert any(ISWA_BASE_URL in step for step in lineage), lineage
+        assert any(ISWA_BASE_URL in ref for ref in rec.provenance.dataset_refs)
 
 
 @pytest.mark.asyncio
@@ -606,8 +654,15 @@ async def test_fetch_scoreboard_c_end_to_end(
         json_payload=scoreboard_c_recent_payload,
     )
     client = httpx.AsyncClient(base_url=ISWA_BASE_URL, transport=transport)
+    # Full-month window: the mocked listing's filenames are dated
+    # 2024-05-01, and the filename prefilter (correctly) skips files whose
+    # embedded dates fall outside the query window — the old Gannon-week
+    # window only worked because every listed file used to be fetched
+    # regardless of its name.
+    month_start = datetime(2024, 5, 1, tzinfo=UTC)
+    month_end = datetime(2024, 5, 31, tzinfo=UTC)
     async with SepScoreboardsAdapter(client=client, cache=False) as sb:
-        records = [r async for r in sb.fetch_scoreboard_c(start=GANNON_START, end=GANNON_END)]
+        records = [r async for r in sb.fetch_scoreboard_c(start=month_start, end=month_end)]
     assert records
     assert all(r.source is SourceID.SEP_SCOREBOARD_C for r in records)
     assert all(r.record_type == "event_time_profile" for r in records)
@@ -626,8 +681,12 @@ async def test_fetch_unified_returns_all_three_boards(
         json_payload=scoreboard_c_recent_payload,
     )
     client = httpx.AsyncClient(base_url=ISWA_BASE_URL, transport=transport)
+    # Full-month window: the mocked listing's filenames are dated
+    # 2024-05-01 and must survive the filename prefilter.
+    month_start = datetime(2024, 5, 1, tzinfo=UTC)
+    month_end = datetime(2024, 5, 31, tzinfo=UTC)
     async with SepScoreboardsAdapter(client=client, cache=False) as sb:
-        records = [r async for r in sb.fetch(start=GANNON_START, end=GANNON_END)]
+        records = [r async for r in sb.fetch(start=month_start, end=month_end)]
 
     sources = {r.source for r in records}
     assert SourceID.SEP_SCOREBOARD_A in sources
@@ -664,7 +723,14 @@ async def test_fetch_filters_envelopes_outside_window(
     listing_umasep_2024_05_html: str,
     scoreboard_a_recent_payload: dict[str, Any],
 ) -> None:
-    """Issue time is May 2024 but we query Jan 2024 → must yield zero records."""
+    """Envelope issue_time outside the window → zero records.
+
+    The window is chosen so the listing's 2024-05-01 filenames PASS the
+    filename prefilter (its ±1 day pad is date-granular) while the fixture
+    envelope's issue_time (2024-05-01T00:09:20Z) falls BEFORE the window
+    start — this test must exercise the downstream issue-time filter, not
+    the filename one.
+    """
 
     transport = _make_mock_transport(
         listing_html=listing_umasep_2024_05_html,
@@ -672,16 +738,15 @@ async def test_fetch_filters_envelopes_outside_window(
     )
     client = httpx.AsyncClient(base_url=ISWA_BASE_URL, transport=transport)
     async with SepScoreboardsAdapter(client=client, cache=False) as sb:
-        # Query window covering Jan 2024 only
         records = [
             r
             async for r in sb.fetch_scoreboard_a(
-                start=datetime(2024, 1, 1, tzinfo=UTC),
-                end=datetime(2024, 1, 31, tzinfo=UTC),
+                start=datetime(2024, 5, 1, 12, 0, tzinfo=UTC),
+                end=datetime(2024, 5, 2, tzinfo=UTC),
             )
         ]
-    # The listing-html fixture is hit for any month, but the envelope's
-    # issue_time falls outside the window, so all records are filtered.
+    # Files are fetched (names date-match the window) but the envelope's
+    # issue_time (00:09Z, before the 12:00Z start) filters every record.
     assert records == []
 
 
@@ -692,8 +757,12 @@ async def test_fetch_september_2017_event(
 ) -> None:
     """Cross-check for the September 2017 event (proposal Table 3-1)."""
 
+    # Reuse the real Apache-listing fixture's structure but rewrite its
+    # embedded dates into the 2017-09 window — the filename prefilter
+    # (correctly) skips files whose names date outside the query window.
+    listing_2017_html = listing_umasep_2024_05_html.replace("2024_05_01", "2017_09_06")
     transport = _make_mock_transport(
-        listing_html=listing_umasep_2024_05_html,
+        listing_html=listing_2017_html,
         json_payload=scoreboard_a_sep2017_payload,
     )
     client = httpx.AsyncClient(base_url=ISWA_BASE_URL, transport=transport)
@@ -850,12 +919,23 @@ def test_default_rate_limit_is_3_rps() -> None:
 
 
 @pytest.mark.live
+@pytest.mark.timeout(1800)
 @pytest.mark.asyncio
 async def test_live_iswa_recent() -> None:
-    """Hit live ISWA and pull whatever's in the most recent month for UMASEP."""
+    """Hit live ISWA and pull whatever's in the last 3 days for UMASEP.
+
+    Window is 3 days (was 30): month directories hold every file for the
+    month (13k+ during 2026-08's activity) and fetching runs at 3 RPS, so
+    the crawl cost scales with matched files — the filename prefilter
+    (``_filename_maybe_in_window``) plus this window keeps an active-Sun
+    run to minutes where the unfiltered 30-day crawl burned 2.5 h in CI.
+    The timeout above is 2.5x the measured active-period wall clock
+    (11 m 53 s on 2026-08-31, the tail of a very active month), not the
+    suite default; the job-level cap in ci.yml still bounds the whole run.
+    """
 
     now = datetime.now(UTC)
-    start = now - timedelta(days=30)
+    start = now - timedelta(days=3)
     async with SepScoreboardsAdapter(
         cache=False,
         models=(ScoreboardModelSpec(name="UMASEP", variants=("v3_X",), energies=("10MeV",)),),

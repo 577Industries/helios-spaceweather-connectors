@@ -21,14 +21,23 @@ Endpoints
 * **Real-time Kp** (3-hourly):
   ``https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json``
 
-* **Solar wind plasma** (1-min cadence, DSCOVR-derived):
-  ``https://services.swpc.noaa.gov/products/solar-wind/plasma-7-day.json``
-  (NOTE: the DSCOVR adapter in this package also covers historical
-  plasma; SWPC is the real-time fast path.)
+* **Solar wind plasma** (1-min cadence, RTSW multi-observatory):
+  ``https://services.swpc.noaa.gov/json/rtsw/rtsw_wind_1m.json``
+  NOAA retired ``/products/solar-wind/plasma-7-day.json`` in 2026-08; the
+  RTSW successor is list-of-dicts, newest-first, ~24 h deep, one record
+  per (minute, observatory) with the prime stream flagged ``active`` —
+  observatories are SOLAR1 / IMAP / ACE (DSCOVR no longer appears). The
+  adapter yields prime rows only and maps ``proton_density`` /
+  ``proton_speed`` / ``proton_temperature`` onto the long-standing
+  ``density`` / ``speed`` / ``temperature`` value keys. (NOTE: the DSCOVR
+  adapter in this package covers historical plasma; SWPC is the real-time
+  fast path.)
 
-* **Interplanetary magnetic field** (1-min cadence, DSCOVR-derived):
-  ``https://services.swpc.noaa.gov/products/solar-wind/mag-7-day.json``
-  (Same DSCOVR-overlap note as plasma.)
+* **Interplanetary magnetic field** (1-min cadence, RTSW multi-observatory):
+  ``https://services.swpc.noaa.gov/json/rtsw/rtsw_mag_1m.json``
+  Same 2026-08 RTSW migration note as plasma; field names
+  (``bx_gsm``/``by_gsm``/``bz_gsm``/``bt``) carried over unchanged, with
+  GSE components and ``theta``/``phi`` angles riding along.
 
 * **3-day probabilistic forecast** (text product, daily issue):
   ``https://services.swpc.noaa.gov/text/3-day-forecast.txt``
@@ -108,6 +117,7 @@ __all__ = [
     "SWPC_BASE_URL",
     "SWPC_PRODUCTS",
     "SWPC_REALTIME_DAYS",
+    "SWPC_SOLARWIND_HOURS",
     "SwpcAdapter",
 ]
 
@@ -127,14 +137,27 @@ Any query with ``start < now - SWPC_REALTIME_DAYS`` triggers the archive
 fallback to GFZ Potsdam (Kp) or Kyoto WDC (Dst).
 """
 
+SWPC_SOLARWIND_HOURS = 24
+"""Approximate depth of the RTSW solar-wind feed (plasma + mag).
+
+The retired ``/products/solar-wind`` feeds carried 7 days; the 2026-08
+RTSW successors carry roughly the trailing 24 hours. Queries starting
+earlier than this get whatever the feed still holds, plus a warning
+pointing at :class:`DscovrAdapter`'s archive path.
+"""
+
 SWPC_PRODUCTS: dict[str, str] = {
     "kp": "/products/noaa-planetary-k-index.json",
-    "plasma": "/products/solar-wind/plasma-7-day.json",
-    "mag": "/products/solar-wind/mag-7-day.json",
+    "plasma": "/json/rtsw/rtsw_wind_1m.json",
+    "mag": "/json/rtsw/rtsw_mag_1m.json",
     "goes_protons": "/json/goes/primary/integral-protons-7-day.json",
     "sep_forecast": "/text/3-day-forecast.txt",
 }
-"""Product slug -> relative URL path."""
+"""Product slug -> relative URL path.
+
+``plasma``/``mag`` moved to the RTSW feed when NOAA retired the whole
+``/products/solar-wind/`` line in 2026-08 (every variant 404s since).
+"""
 
 GFZ_KP_ARCHIVE_URL = "https://kp.gfz.de/app/files/Kp_ap_Ap_SN_F107_since_1932.txt"
 """GFZ Potsdam Kp archive URL (CC-BY-4.0).
@@ -323,20 +346,21 @@ class SwpcAdapter(BaseAdapter):
     async def fetch_plasma(
         self, *, start: datetime, end: datetime
     ) -> AsyncIterator[NormalizedRecord]:
-        """Stream 1-min DSCOVR-derived solar wind plasma records.
+        """Stream 1-min RTSW solar wind plasma records (prime observatory).
 
-        Real-time only. For historical plasma data, use the DSCOVR
-        adapter's CDAWeb fallback.
+        Real-time only, ~24 h deep. For historical plasma data, use the
+        DSCOVR adapter's archive path.
         """
-        if _needs_archive(start):
+        if _solarwind_needs_archive(start):
             logger.warning(
                 "SwpcAdapter.fetch_plasma: start=%s is older than the SWPC "
-                "real-time window (%d days); plasma historical data is not "
-                "served by SWPC — use DscovrAdapter for archive plasma.",
+                "real-time window (~%d hours of RTSW data); plasma historical "
+                "data is not served by SWPC — use DscovrAdapter for archive "
+                "plasma.",
                 _ensure_utc(start).isoformat(),
-                SWPC_REALTIME_DAYS,
+                SWPC_SOLARWIND_HOURS,
             )
-        async for rec in self._fetch_columnar(
+        async for rec in self._fetch_rtsw(
             endpoint=_ENDPOINTS["plasma"],
             start=start,
             end=end,
@@ -346,19 +370,20 @@ class SwpcAdapter(BaseAdapter):
             yield rec
 
     async def fetch_mag(self, *, start: datetime, end: datetime) -> AsyncIterator[NormalizedRecord]:
-        """Stream 1-min DSCOVR-derived IMF records.
+        """Stream 1-min RTSW IMF records (prime observatory).
 
-        Real-time only. Bx/By/Bz in GSM, Bt magnitude in nT.
+        Real-time only, ~24 h deep. Bx/By/Bz in GSM, Bt magnitude in nT.
         """
-        if _needs_archive(start):
+        if _solarwind_needs_archive(start):
             logger.warning(
                 "SwpcAdapter.fetch_mag: start=%s is older than the SWPC "
-                "real-time window (%d days); IMF historical data is not "
-                "served by SWPC — use DscovrAdapter for archive IMF.",
+                "real-time window (~%d hours of RTSW data); IMF historical "
+                "data is not served by SWPC — use DscovrAdapter for archive "
+                "IMF.",
                 _ensure_utc(start).isoformat(),
-                SWPC_REALTIME_DAYS,
+                SWPC_SOLARWIND_HOURS,
             )
-        async for rec in self._fetch_columnar(
+        async for rec in self._fetch_rtsw(
             endpoint=_ENDPOINTS["mag"],
             start=start,
             end=end,
@@ -675,10 +700,10 @@ class SwpcAdapter(BaseAdapter):
                 )
 
     # ------------------------------------------------------------------ #
-    # Columnar (plasma/mag) and list-of-dict (proton) helpers
+    # RTSW (plasma/mag) and list-of-dict (proton) helpers
     # ------------------------------------------------------------------ #
 
-    async def _fetch_columnar(
+    async def _fetch_rtsw(
         self,
         *,
         endpoint: _Endpoint,
@@ -687,30 +712,37 @@ class SwpcAdapter(BaseAdapter):
         value_units: str,
         time_field: str,
     ) -> AsyncIterator[NormalizedRecord]:
-        """Fetch SWPC's header-as-first-row CSV-style JSON arrays.
+        """Fetch SWPC's RTSW list-of-dict feeds (plasma/mag), prime rows only.
 
-        plasma-7-day.json and mag-7-day.json use this format::
-
-            [[col_a, col_b, ...], [val_a, val_b, ...], ...]
+        The RTSW files are newest-first, one record per (minute,
+        observatory), with the prime observatory flagged ``active: true``.
+        We keep prime rows only (restoring the retired products feed's
+        one-record-per-minute contract), yield chronologically, and map
+        the RTSW ``proton_*`` plasma field names onto the long-standing
+        ``density``/``speed``/``temperature`` value keys so downstream
+        consumers see a stable value shape across the migration. The
+        observing spacecraft lands in ``value["observatory"]``.
         """
         await self._ratelimiter.acquire()
         response = await request_with_retry(self._client, "GET", endpoint.path, safe_log_params=())
         raw = response.json()
         if not isinstance(raw, list) or not raw:
             raise httpx.DecodingError(f"SWPC {endpoint.slug}: empty or non-list response")
-        header = raw[0]
-        if not isinstance(header, list) or time_field not in header:
+        if not isinstance(raw[0], dict):
             raise httpx.DecodingError(
-                f"SWPC {endpoint.slug}: header missing {time_field!r}: {header}"
+                f"SWPC {endpoint.slug}: expected RTSW list-of-dicts, got row type "
+                f"{type(raw[0]).__name__}"
             )
-        time_idx = header.index(time_field)
         start_utc = _ensure_utc(start)
         end_utc = _ensure_utc(end)
 
-        for row in raw[1:]:
-            if not isinstance(row, list) or len(row) != len(header):
+        # Newest-first upstream; walk reversed so we yield chronologically.
+        for item in reversed(raw):
+            if not isinstance(item, dict):
                 continue
-            ts_raw = row[time_idx]
+            if "active" in item and item.get("active") is not True:
+                continue  # non-prime observatory's duplicate of this minute
+            ts_raw = item.get(time_field)
             if not isinstance(ts_raw, str):
                 continue
             try:
@@ -722,15 +754,18 @@ class SwpcAdapter(BaseAdapter):
             if ts < start_utc or ts > end_utc:
                 continue
             value: dict[str, Any] = {}
-            for idx, col in enumerate(header):
-                if idx == time_idx:
+            observatory = item.get("source")
+            if isinstance(observatory, str):
+                value["observatory"] = observatory
+            for key, raw_val in item.items():
+                if not isinstance(key, str) or key in (time_field, "active", "source"):
                     continue
-                raw_val = row[idx]
+                out_key: str = _RTSW_LEGACY_KEYS.get(key, key)
                 if isinstance(raw_val, str):
                     coerced = _coerce_float(raw_val)
-                    value[col] = coerced if coerced is not None else raw_val
+                    value[out_key] = coerced if coerced is not None else raw_val
                 else:
-                    value[col] = raw_val
+                    value[out_key] = raw_val
             scalar = _columnar_scalar(endpoint.record_type, value)
             provenance = self._emit_provenance(
                 model_id=endpoint.model_id,
@@ -747,7 +782,7 @@ class SwpcAdapter(BaseAdapter):
                 value=value,
                 value_units=value_units,
                 provenance=provenance,
-                raw={"header": header, "row": row},
+                raw=dict(item),
             )
 
     async def _fetch_listdict(
@@ -1047,9 +1082,15 @@ def _parse_radio_blackout(text: str) -> list[dict[str, Any]]:
 
 
 def _needs_archive(start: datetime) -> bool:
-    """True iff ``start`` is older than the SWPC real-time window."""
+    """True iff ``start`` is older than the SWPC real-time window (Kp/Dst)."""
     now = datetime.now(UTC)
     return _ensure_utc(start) < now - timedelta(days=SWPC_REALTIME_DAYS)
+
+
+def _solarwind_needs_archive(start: datetime) -> bool:
+    """True iff ``start`` predates the RTSW solar-wind depth (~24 h)."""
+    now = datetime.now(UTC)
+    return _ensure_utc(start) < now - timedelta(hours=SWPC_SOLARWIND_HOURS)
 
 
 def _ensure_utc(ts: datetime) -> datetime:
@@ -1077,11 +1118,20 @@ def _coerce_float(val: Any) -> float | None:
 
 # Map a record_type to the field in the payload that carries the
 # headline scalar value the provenance record records. Used by the
-# columnar (plasma/mag) and list-of-dict (proton) paths.
+# RTSW (plasma/mag) and list-of-dict (proton) paths.
 _PRIMARY_SCALAR_FIELD: dict[str, tuple[str, ...]] = {
     "plasma": ("speed", "density", "temperature"),
     "mag": ("bz_gsm", "bz", "bt"),
     "proton": ("flux",),
+}
+
+# RTSW plasma field -> the key the retired /products/solar-wind feed used.
+# Applied by _fetch_rtsw so the value shape stays stable across NOAA's
+# 2026-08 migration (mag field names carried over unchanged upstream).
+_RTSW_LEGACY_KEYS: dict[str, str] = {
+    "proton_density": "density",
+    "proton_speed": "speed",
+    "proton_temperature": "temperature",
 }
 
 

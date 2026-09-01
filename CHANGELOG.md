@@ -4,6 +4,41 @@ All notable changes to this project are documented here, following [Keep a Chang
 
 ## [Unreleased]
 
+### Changed
+- **BREAKING / NOAA upstream migration (2026-08)**: NOAA SWPC retired the
+  entire `/products/solar-wind/` product line (every variant 404s). The
+  `plasma`/`mag` products of `SwpcAdapter` and the near-real-time leg of
+  `DscovrAdapter` now consume the RTSW successors
+  (`/json/rtsw/rtsw_wind_1m.json`, `/json/rtsw/rtsw_mag_1m.json`):
+  list-of-dicts, newest-first, ~24 h deep (was 7 days —
+  `SWPC_SOLARWIND_HOURS` documents the new depth), one record per
+  (minute, observatory) with the prime stream flagged `active`. Adapters
+  yield prime rows only, chronologically. Plasma `proton_*` fields map
+  onto the long-standing `density`/`speed`/`temperature` value keys; mag
+  field names were carried over by NOAA unchanged.
+- **BREAKING**: `DscovrAdapter`'s near-real-time records are tagged with
+  the new `SourceID.RTSW` instead of `SourceID.DSCOVR` — the feed's
+  observatories are now SOLAR1/IMAP/ACE, so the DSCOVR instrument claim
+  would be false. `SourceID.DSCOVR` remains on the PySPEDAS/NCEI archive
+  leg (genuinely DSCOVR L2 CDFs). Consumers filtering realtime records on
+  `SourceID.DSCOVR` must add `SourceID.RTSW`. Every RTSW-leg record (both
+  adapters) carries the observing spacecraft in `value["observatory"]`.
+
+### Fixed
+- `SepScoreboardsAdapter` provenance now cites full ISWA URLs: lineage and
+  `dataset_refs` previously carried client-relative paths (no host), which
+  went unnoticed while UMASEP had no recent issuances and surfaced as live
+  failures when 2026-08 activity produced records.
+- `SepScoreboardsAdapter` now prefilters listing filenames by their
+  embedded dates before downloading (fail-open for unrecognized names).
+  Month directories hold every file for the month (13k+ during 2026-08's
+  activity) and the issue-time filter only ran after download, so ANY
+  window touching an active month crawled the whole month at 3 RPS —
+  hours of runner time (the 08-30 nightly burned 2 h 33 m).
+- Live-integration CI is capped (`timeout-minutes: 45`, per-test
+  `pytest-timeout` budgets) and `test_live_iswa_recent` crawls 3 days
+  instead of 30.
+
 ### Added
 - `CddisGimAdapter` — NASA CDDIS Global Ionosphere Maps (vertical TEC at
   2-hour cadence on 2.5-by-5 deg grid). BUILD strategy: no maintained Python

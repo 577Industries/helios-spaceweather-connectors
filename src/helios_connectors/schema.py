@@ -50,6 +50,11 @@ class SourceID(StrEnum):
     SWPC = "swpc"
     GOES = "goes"
     DSCOVR = "dscovr"
+    # NOAA SWPC's real-time-solar-wind feed as a *service*: multi-observatory
+    # (SOLAR1 / IMAP / ACE, prime-selected upstream). Not DSCOVR — since the
+    # 2026-08 /products/solar-wind retirement, DSCOVR only describes the NCEI
+    # archive leg of DscovrAdapter.
+    RTSW = "rtsw"
     CDDIS_GIM = "cddis_gim"
     SEP_SCOREBOARD_A = "sep_scoreboard_a"
     SEP_SCOREBOARD_B = "sep_scoreboard_b"

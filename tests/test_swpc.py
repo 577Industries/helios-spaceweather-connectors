@@ -437,15 +437,15 @@ async def test_fetch_dst_recent_uses_provisional(kyoto_dst_2405_fixture: str) ->
 
 
 # ---------------------------------------------------------------------------- #
-# Plasma + Mag (columnar)
+# Plasma + Mag (RTSW list-of-dicts)
 # ---------------------------------------------------------------------------- #
 
 
 @pytest.mark.asyncio
-async def test_fetch_plasma_columnar(
-    swpc_plasma_fixture: list[list[Any]],
+async def test_fetch_plasma_rtsw(
+    swpc_plasma_fixture: list[dict[str, Any]],
 ) -> None:
-    """Plasma fetcher must parse header-as-first-row JSON arrays correctly."""
+    """Plasma fetcher must reduce RTSW to prime rows with legacy value keys."""
     client = _swpc_mock_client({SWPC_PRODUCTS["plasma"]: swpc_plasma_fixture})
     # Use a very wide window so all fixture rows pass the filter.
     async with SwpcAdapter(client=client, cache=False) as swpc:
@@ -456,21 +456,29 @@ async def test_fetch_plasma_columnar(
                 end=datetime(2099, 1, 1, tzinfo=UTC),
             )
         ]
-    assert records
-    sample = records[0]
+    # Only prime (active) rows survive — one record per minute, not one per
+    # (minute, observatory).
+    n_active = sum(1 for row in swpc_plasma_fixture if row.get("active"))
+    assert len(records) == n_active
+    sample = records[-1]  # newest
     assert sample.source == SourceID.SWPC
     assert sample.record_type == "plasma"
-    # Expected float columns: density, speed, temperature
+    # RTSW proton_* keys must land under the legacy names.
     assert "density" in sample.value
     assert "speed" in sample.value
     assert "temperature" in sample.value
-    # Values must be parsed as floats from their string representation.
-    assert isinstance(sample.value["density"], float)
     assert isinstance(sample.value["speed"], float)
+    # The observing spacecraft is carried per record (post-DSCOVR feed).
+    assert sample.value["observatory"] in {"SOLAR1", "IMAP", "ACE"}
+    # Records come out chronologically even though RTSW serves newest-first.
+    times = [r.event_time for r in records]
+    assert times == sorted(times)
+    # The hand-nulled proton_density row must surface as None, not a fill value.
+    assert any(r.value["density"] is None for r in records)
 
 
 @pytest.mark.asyncio
-async def test_fetch_mag_columnar(swpc_mag_fixture: list[list[Any]]) -> None:
+async def test_fetch_mag_rtsw(swpc_mag_fixture: list[dict[str, Any]]) -> None:
     client = _swpc_mock_client({SWPC_PRODUCTS["mag"]: swpc_mag_fixture})
     async with SwpcAdapter(client=client, cache=False) as swpc:
         records = [
@@ -480,18 +488,21 @@ async def test_fetch_mag_columnar(swpc_mag_fixture: list[list[Any]]) -> None:
                 end=datetime(2099, 1, 1, tzinfo=UTC),
             )
         ]
-    assert records
-    sample = records[0]
+    n_active = sum(1 for row in swpc_mag_fixture if row.get("active"))
+    assert len(records) == n_active
+    sample = records[-1]
     assert sample.source == SourceID.SWPC
     assert sample.record_type == "mag"
     assert sample.value_units == "nT"
+    # Mag field names carried over from the retired feed unchanged.
     assert "bz_gsm" in sample.value
     assert "bt" in sample.value
+    assert sample.value["observatory"] in {"SOLAR1", "IMAP", "ACE"}
 
 
 @pytest.mark.asyncio
 async def test_fetch_plasma_archive_window_warns(
-    swpc_plasma_fixture: list[list[Any]],
+    swpc_plasma_fixture: list[dict[str, Any]],
     caplog: pytest.LogCaptureFixture,
 ) -> None:
     """fetch_plasma with old start must log a deferral warning."""
@@ -556,8 +567,8 @@ async def test_fetch_sep_forecast(swpc_sep_forecast_fixture: str) -> None:
 @pytest.mark.asyncio
 async def test_unified_fetch_dispatches_across_products(
     swpc_kp_realtime_fixture: list[dict[str, Any]],
-    swpc_plasma_fixture: list[list[Any]],
-    swpc_mag_fixture: list[list[Any]],
+    swpc_plasma_fixture: list[dict[str, Any]],
+    swpc_mag_fixture: list[dict[str, Any]],
     swpc_protons_fixture: list[dict[str, Any]],
     swpc_sep_forecast_fixture: str,
     monkeypatch: pytest.MonkeyPatch,
