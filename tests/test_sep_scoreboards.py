@@ -25,7 +25,6 @@ import httpx
 import pytest
 
 from helios_connectors import SepScoreboardsAdapter, SourceID
-from helios_connectors.ratelimit import RateLimiter
 from helios_connectors.adapters.sep_scoreboards import (
     ALL_SCOREBOARDS,
     FORBIDDEN_PATH_TOKENS,
@@ -51,6 +50,7 @@ from helios_connectors.adapters.sep_scoreboards import (
     _scoreboard_c_record,
     _spase_id,
 )
+from helios_connectors.ratelimit import RateLimiter
 
 FIXTURES = Path(__file__).parent / "fixtures" / "sep_scoreboards"
 
@@ -83,7 +83,7 @@ def _hermetic_tests_do_not_pace(
     if "live" in request.keywords:
         return
 
-    async def _instant(self: RateLimiter, tokens: int = 1) -> None:  # noqa: ARG001
+    async def _instant(self: RateLimiter, tokens: int = 1) -> None:
         return None
 
     monkeypatch.setattr(RateLimiter, "acquire", _instant)
