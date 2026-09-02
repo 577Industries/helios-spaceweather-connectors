@@ -95,11 +95,22 @@ and uses the shared `helios_connectors.http.request_with_retry` with
 exponential backoff (1 s → 30 s, 4 attempts) on 429 / 5xx /
 `httpx.TransportError`.
 
-Empirically a `fetch_scoreboard_a(start=GANNON_START, end=GANNON_END)`
+Cost scales with the number of files the listings *match*, not with the
+window length. ISWA month directories hold every file for the month —
+13k+ during 2026-08's activity — and the issue-time filter can only run
+after a file is downloaded, so before the 2026-08 fix (#20) ANY window
+touching an active month crawled the whole month at 3 RPS: the 2026-08-30
+nightly burned 2 h 33 m on a 30-day window. The adapter now prefilters
+listing filenames by their embedded dates (`_filename_maybe_in_window`,
+fail-open for unrecognized names) before downloading; keep that ahead of
+every download and keep live windows small (the nightly uses 3 days).
+
+For scale: a `fetch_scoreboard_a(start=GANNON_START, end=GANNON_END)`
 across the default 8-model registry hits roughly 240 listing URLs
-(8 models × ≤5 energies × 6 months = 240) and a few hundred JSON files
-in the populated months. At 3 RPS this completes in ~2 minutes; the
-file cache (enabled by default) makes subsequent calls instant.
+(8 models × ≤5 energies × 6 months = 240) and, in the populated months,
+a few hundred JSON files — minutes, not hours, once the prefilter keeps
+unmatched files out. The file cache (enabled by default) makes subsequent
+calls instant.
 
 ## Provenance lineage
 
