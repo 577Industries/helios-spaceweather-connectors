@@ -20,11 +20,11 @@ Applications for Space Weather R2O2R). See proposal §2 Obj. 1 + §3 T1.
 | Adapter | Strategy | Status |
 |---|---|---|
 | NASA DONKI | BUILD | **v0.1 — shipped** |
-| CCMC SEP Scoreboards A/B/C | BUILD | Planned (v0.2) |
-| NOAA SWPC | EXTEND | Planned (v0.2) |
-| NASA CDDIS GIMs | BUILD | Planned (v0.3) |
-| GOES X-ray + proton | WRAP | Planned (v0.3) |
-| DSCOVR | WRAP | Planned (v0.3) |
+| CCMC SEP Scoreboards A/B/C | BUILD | **v0.2 — shipped** |
+| NOAA SWPC | EXTEND | **v0.2 — shipped** (RTSW feeds since 2026-08) |
+| NASA CDDIS GIMs | BUILD | **v0.2.1 — shipped** |
+| GOES X-ray + proton | WRAP | **v0.2.1 — shipped** |
+| DSCOVR | WRAP | **v0.2.1 — shipped** (archive leg; realtime is `SourceID.RTSW`) |
 
 See [`docs/index.md`](docs/index.md) for the full adapter survey and
 [`docs/design.md`](docs/design.md) for the framework conventions.
@@ -32,7 +32,8 @@ See [`docs/index.md`](docs/index.md) for the full adapter survey and
 ## Quickstart
 
 ```bash
-pip install helios-spaceweather-connectors
+# Not on PyPI yet (the publish step is blocked on a dependency that PyPI refuses); install from the tag:
+pip install "helios-spaceweather-connectors @ git+https://github.com/577Industries/helios-spaceweather-connectors@v0.2.1"
 ```
 
 ```python

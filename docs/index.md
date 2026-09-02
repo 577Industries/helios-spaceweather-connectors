@@ -14,9 +14,9 @@ contract.
 | NASA DONKI (CME, FLR, SEP, GST, IPS, MPC, RBE, HSS, notifications) | BUILD | **v0.1 — shipped** | [`adapters.donki`](adapters/donki.md) |
 | CCMC SEP Scoreboards A / B / C | BUILD | **v0.2 — shipped** | [`adapters.sep_scoreboards`](adapters/sep_scoreboards.md) |
 | NOAA SWPC (Kp, plasma, mag, SEP forecast JSON) + GFZ/Kyoto archive fallback | EXTEND | **v0.2 — shipped** | [`adapters.swpc`](adapters/swpc.md) |
-| NASA CDDIS GIMs (IONEX) | BUILD | Planned (v0.3) | `adapters.cddis_gim` |
-| GOES X-ray + proton flux | WRAP (PySPEDAS / SWPC NRT JSON) | Planned (v0.3) | `adapters.goes` |
-| DSCOVR upstream solar wind | WRAP (PySPEDAS / NOAA NRT JSON) | Planned (v0.3) | `adapters.dscovr` |
+| NASA CDDIS GIMs (IONEX) | BUILD | **v0.2.1 — shipped** | [`adapters.cddis_gim`](adapters/cddis.md) |
+| GOES X-ray + proton flux | WRAP (PySPEDAS / SWPC NRT JSON) | **v0.2.1 — shipped** | [`adapters.goes`](adapters/goes.md) |
+| DSCOVR upstream solar wind | WRAP (PySPEDAS archive / NOAA RTSW realtime) | **v0.2.1 — shipped** (realtime records carry `SourceID.RTSW`) | [`adapters.dscovr`](adapters/dscovr.md) |
 
 Strategy reference (from the master plan landscape survey):
 
@@ -32,7 +32,8 @@ rather than direct adapter integration.
 ## Quickstart
 
 ```bash
-pip install helios-spaceweather-connectors
+# Not on PyPI yet (the publish step is blocked on a dependency that PyPI refuses); install from the tag:
+pip install "helios-spaceweather-connectors @ git+https://github.com/577Industries/helios-spaceweather-connectors@v0.2.1"
 ```
 
 ```python
