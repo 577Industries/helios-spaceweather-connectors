@@ -38,9 +38,11 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
-    # The hermetic suite runs ~26 min on hosted runners (2026-09-02); 40 is
-    # the backstop, not a target — --durations names what to speed up.
-    timeout-minutes: 40
+    # The hermetic suite ran ~26 min until 2026-09-02, when --durations showed
+    # 25 of them were the SEP scoreboard tests sleeping on the real token
+    # bucket (tests/test_sep_scoreboards.py no-ops it for non-live tests now);
+    # the suite is ~2 min. 15 is the backstop, not a target.
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:

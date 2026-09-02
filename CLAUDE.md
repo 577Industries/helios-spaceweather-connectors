@@ -15,6 +15,7 @@ Six adapters (DONKI, SEP Scoreboards A/B/C, SWPC, CDDIS GIM, GOES, DSCOVR) → o
 - Job cap `timeout-minutes: 45` in [.github/workflows/ci.yml](.github/workflows/ci.yml) is the backstop — don't raise it, fix the crawl.
 - Per-test budget = **2.5× wall clock measured in an active-Sun period**, as `@pytest.mark.timeout(N)`; reference `tests/test_sep_scoreboards.py::test_live_iswa_recent` = 1800 s = 2.5 × 11 m 53 s (2026-08-31). Re-measure with `pytest -m live --no-cov --durations=0 -k <name>`; update the marker **and** its docstring (value + date) in the same PR.
 - Crawl cost scales with *matched files*, not window length: keep `_filename_maybe_in_window` ahead of every download and keep live windows small (3 days, not 30).
+- Hermetic tests never pace: `tests/test_sep_scoreboards.py` has a module-level autouse fixture that no-ops `RateLimiter.acquire` for non-`live` tests (before 2026-09-02 the suite was 26 min of `asyncio.sleep` — 735 token waits). Live tests keep the real limiter; `tests/test_ratelimit.py` tests the limiter itself.
 
 ## Gotchas
 
