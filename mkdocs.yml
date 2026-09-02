@@ -99,3 +99,6 @@ nav:
       - DONKI: adapters/donki.md
       - CDDIS GIM: adapters/cddis.md
       - SEP Scoreboards: adapters/sep_scoreboards.md
+      - SWPC: adapters/swpc.md
+      - DSCOVR: adapters/dscovr.md
+      - GOES: adapters/goes.md
