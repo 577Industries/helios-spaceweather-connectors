@@ -5,7 +5,17 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    groups:
+      # One PR for all minor/patch pins (the docs pins arrive together;
+      # each separate PR costs a ~26-minute test matrix). Majors stay individual.
+      pip-minor-patch:
+        patterns: ["*"]
+        update-types: ["minor", "patch"]
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
+    open-pull-requests-limit: 3
+    groups:
+      github-actions:
+        patterns: ["*"]

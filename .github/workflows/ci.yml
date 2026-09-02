@@ -14,9 +14,17 @@ on:
     - cron: '17 6 * * *'
   workflow_dispatch:
 
+# Superseded PR runs are cancelled; push, schedule and dispatch runs never
+# are (the nightly must finish), and the event name in the group keeps a
+# 06:17 UTC schedule run from queueing behind a push run on main.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   lint:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
@@ -30,6 +38,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    # The hermetic suite runs ~26 min on hosted runners (2026-09-02); 40 is
+    # the backstop, not a target — --durations names what to speed up.
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
@@ -43,7 +54,7 @@ jobs:
       - run: pip install '.[dev]'
       # Unit-test pass: deselects @pytest.mark.live to keep PR signal
       # independent of upstream NASA service availability.
-      - run: pytest -m "not live"
+      - run: pytest -m "not live" --durations=20
       - if: matrix.python-version == '3.12'
         uses: codecov/codecov-action@v7
         with:
@@ -72,10 +83,11 @@ jobs:
           # NASA_API_KEY is optional — the live test defaults to the
           # CCMC kauai endpoint which is unauthenticated.
           NASA_API_KEY: ${{ secrets.NASA_API_KEY }}
-        run: pytest -m live --no-cov --timeout=300
+        run: pytest -m live --no-cov --timeout=300 --durations=15
 
   security:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-python@v7
