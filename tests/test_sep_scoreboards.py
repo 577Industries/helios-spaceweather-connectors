@@ -25,6 +25,7 @@ import httpx
 import pytest
 
 from helios_connectors import SepScoreboardsAdapter, SourceID
+from helios_connectors.ratelimit import RateLimiter
 from helios_connectors.adapters.sep_scoreboards import (
     ALL_SCOREBOARDS,
     FORBIDDEN_PATH_TOKENS,
@@ -63,6 +64,29 @@ SEP2017_END = datetime(2017, 9, 11, tzinfo=UTC)
 # ---------------------------------------------------------------------------- #
 # fixtures
 # ---------------------------------------------------------------------------- #
+
+
+@pytest.fixture(autouse=True)
+def _hermetic_tests_do_not_pace(
+    request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No-op the token bucket for every test in this module except ``live`` ones.
+
+    The adapter awaits ``RateLimiter.acquire`` before each of the ~735 mocked
+    downloads the end-to-end tests walk (the listing fixture is served for
+    every model/energy/version directory), and the real 3 req/s bucket turned
+    each of those tests into ~251 s of ``asyncio.sleep`` — 25 of the suite's
+    26 minutes (measured 2026-09-02). Pacing is real behaviour, but it is not
+    what these tests assert; ``tests/test_ratelimit.py`` covers it, and the
+    live tests below keep the real limiter because CCMC does.
+    """
+    if "live" in request.keywords:
+        return
+
+    async def _instant(self: RateLimiter, tokens: int = 1) -> None:  # noqa: ARG001
+        return None
+
+    monkeypatch.setattr(RateLimiter, "acquire", _instant)
 
 
 @pytest.fixture(scope="session")
